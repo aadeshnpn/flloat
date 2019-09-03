@@ -4,25 +4,14 @@ from flloat.base.hashable import Hashable
 
 
 class Symbol(str, Hashable):
-    """A class to represent a symbol (actually, a wrap for a string)"""
-    def __init__(self, name:str):
+    """A class to represent a symbol (actually, a wrap for a string)."""
+    def __init__(self, name: str):
         str.__init__(self)
         Hashable.__init__(self)
         self.name = name
 
     def _members(self):
         return self.name
-
-    # def __hash__(self):
-    #     return hash(self._members())
-    #
-    # def __eq__(self, other):
-    #     if type(other) is type(self):
-    #         return self._members() == other._members()
-    #     else:
-    #         return False
-
-
 
 
 class FunctionSymbol(Symbol):
@@ -32,14 +21,14 @@ class FunctionSymbol(Symbol):
         self.arity = arity
 
     def __str__(self):
-        return self.name + Symbols.CARET.value + str(self.arity)
+        return self.name + '^' + str(self.arity)
 
     def _members(self):
         return (self.name, self.arity)
 
 
 class ConstantSymbol(FunctionSymbol):
-    def __init__(self, name:str):
+    def __init__(self, name: str):
         super().__init__(name, 0)
 
 
@@ -62,10 +51,17 @@ class TrueSymbol(Symbol):
     def __init__(self):
         super().__init__(Symbols.TOP.value)
 
+
 class FalseSymbol(Symbol):
     def __init__(self):
         super().__init__(Symbols.BOTTOM.value)
 
+
 class LastSymbol(Symbol):
     def __init__(self):
         super().__init__(Symbols.LAST.value)
+
+
+class MappingPredicate(Hashable):
+    def __init__(self, states, operator):
+        Hashable.__init__(self)

@@ -1,7 +1,11 @@
+"""Library wide enum classes."""
+
 from enum import Enum
 
 
 class Symbols(Enum):
+    """Symbols class for LTL."""
+
     NOT = "!"
     AND = "&"
     OR = "|"
@@ -35,9 +39,23 @@ class Symbols(Enum):
     LOGICAL_TRUE = "tt"
     LOGICAL_FALSE = "ff"
     CARET = "^"
-    TRUE="true"
+    TRUE = "true"
     FALSE = "false"
     LTLf_LAST = "last"
 
 
+class Operators(Enum):
+    """Operator class for predicate."""
+
+    NOT_EQUALS = "!="
+    EQUAL = "=="
+    LESS = "<"
+    LESS_EQUALS = "<="
+    GREATER = ">"
+    GREATER_EQUALS = ">="
+    IN = "in"
+    NOT_IN = "not in"
+
+
 ALL_SYMBOLS = {v.value for v in Symbols}
+ALL_OPERATORS = {v.value for v in Operators}
