@@ -2,19 +2,29 @@ from abc import abstractmethod
 from functools import lru_cache
 from typing import Set
 
-from flloat.base.Formula import Formula, CommutativeBinaryOperator, AtomicFormula, BinaryOperator, UnaryOperator
+from flloat.base.Formula import (
+    Formula, CommutativeBinaryOperator, AtomicFormula,
+    BinaryOperator, UnaryOperator
+    )
 from flloat.base.Symbol import Symbol
 from flloat.base.Symbols import Symbols
-from flloat.base.convertible import ImpliesDeltaConvertible, EquivalenceDeltaConvertible, ConvertibleFormula, \
+from flloat.base.convertible import (
+    ImpliesDeltaConvertible, EquivalenceDeltaConvertible, ConvertibleFormula,
     BaseConvertibleFormula, DeltaConvertibleFormula
-from flloat.base.nnf import NNF, NotNNF, DualBinaryOperatorNNF, DualUnaryOperatorNNF
+    )
+from flloat.base.nnf import (
+    NNF, NotNNF, DualBinaryOperatorNNF, DualUnaryOperatorNNF
+    )
 from flloat.base.truths import Truth, NotTruth, OrTruth, AndTruth
 from flloat.utils import MAX_CACHE_SIZE
 from flloat.flloat import DFAOTF, to_automaton, to_automaton_
 from flloat.semantics.ldlf import FiniteTrace, FiniteTraceTruth
 from flloat.semantics.pl import PLInterpretation, PLFalseInterpretation
-from flloat.syntax.ldlf import Delta, LDLfAtomic, LDLfNot, LDLfAnd, LDLfOr, LDLfEquivalence, LDLfDiamond, \
-    RegExpPropositional, RegExpStar, RegExpSequence, RegExpTest, LDLfPropositional, LDLfBox, LDLfEnd
+from flloat.syntax.ldlf import (
+    Delta, LDLfAtomic, LDLfNot, LDLfAnd, LDLfOr, LDLfEquivalence, LDLfDiamond,
+    RegExpPropositional, RegExpStar, RegExpSequence, RegExpTest,
+    LDLfPropositional, LDLfBox, LDLfEnd
+    )
 from flloat.syntax.pl import PLTrue, PLFalse, PLAnd, PLOr, PLAtomic
 
 
@@ -32,15 +42,18 @@ class LTLfFormula(Formula, LTLfTruth, NNF, Delta):
         # f = self.to_LDLf().to_nnf()
         d = f._delta(i, epsilon)
         if epsilon:
-            # By definition, if epsilon=True, then the result must be either PLTrue or PLFalse
-            # Now, the output is a Propositional Formula with only PLTrue or PLFalse as atomics
+            # By definition, if epsilon=True, then the result
+            # must be either PLTrue or PLFalse
+            # Now, the output is a Propositional Formula
+            # with only PLTrue or PLFalse as atomics
             # Hence, we just evaluate the formula with a dummy PLInterpretation
             d = PLTrue() if d.truth(None) else PLFalse()
         return d
 
     @abstractmethod
     def _delta(self, i: PLInterpretation, epsilon=False):
-        """apply delta function, assuming that 'self' is a LTLf formula in Negative Normal Form"""
+        """apply delta function, assuming that 'self' is a
+        LTLf formula in Negative Normal Form"""
         raise NotImplementedError
 
     @abstractmethod
@@ -50,7 +63,9 @@ class LTLfFormula(Formula, LTLfTruth, NNF, Delta):
     def __repr__(self):
         return self.__str__()
 
-    def to_automaton(self, labels:Set[Symbol]=None, on_the_fly=False, determinize=False, minimize=True):
+    def to_automaton(
+        self, labels: Set[Symbol]=None, on_the_fly=False,
+            determinize=False, minimize=True):
         if labels is None:
             labels = self.find_labels()
         if on_the_fly:
@@ -64,13 +79,14 @@ class LTLfFormula(Formula, LTLfTruth, NNF, Delta):
 class LTLfCommBinaryOperator(CommutativeBinaryOperator, LTLfFormula):
     pass
 
+
 class LTLfTemporalFormula(LTLfFormula, FiniteTraceTruth):
     pass
 
 
 class LTLfAtomic(AtomicFormula, LTLfFormula):
 
-    def __init__(self, s:Symbol):
+    def __init__(self, s: Symbol):
         AtomicFormula.__init__(self, s)
         self.a = PLAtomic(s)
 
@@ -86,7 +102,7 @@ class LTLfAtomic(AtomicFormula, LTLfFormula):
     def negate(self):
         return LTLfNot(LTLfAtomic(self.s))
 
-    def _delta(self, i:PLInterpretation, epsilon=False):
+    def _delta(self, i: PLInterpretation, epsilon=False):
         if epsilon:
             return PLFalse()
         return PLTrue() if self.a.truth(i) else PLFalse()
@@ -119,12 +135,11 @@ class LTLfFalse(LTLfAtomic):
         return LTLfTrue()
 
 
-
 class LTLfNot(NotTruth, LTLfFormula, NotNNF):
 
     def _delta(self, i: PLInterpretation, epsilon=False):
         if isinstance(self.f, LTLfAtomic) or isinstance(self.f, LTLfEnd):
-            return PLTrue() if self.f._delta(i, epsilon)==PLFalse() else PLFalse()
+            return PLTrue() if self.f._delta(i, epsilon) == PLFalse() else PLFalse()
         else:
             # the formula must be in NNF form!!!
             raise Exception
@@ -132,9 +147,10 @@ class LTLfNot(NotTruth, LTLfFormula, NotNNF):
     def to_LDLf(self):
         return LDLfNot(self.f.to_LDLf())
 
+
 class LTLfAnd(LTLfCommBinaryOperator, AndTruth, DualBinaryOperatorNNF):
 
-    def _delta(self, i:PLInterpretation, epsilon=False):
+    def _delta(self, i: PLInterpretation, epsilon=False):
         return PLAnd([f._delta(i, epsilon) for f in self.formulas])
 
     def to_LDLf(self):
@@ -143,7 +159,7 @@ class LTLfAnd(LTLfCommBinaryOperator, AndTruth, DualBinaryOperatorNNF):
 
 class LTLfOr(LTLfCommBinaryOperator, OrTruth, DualBinaryOperatorNNF):
 
-    def _delta(self, i:PLInterpretation, epsilon=False):
+    def _delta(self, i: PLInterpretation, epsilon=False):
         return PLOr([f._delta(i, epsilon) for f in self.formulas])
 
     def to_LDLf(self):
@@ -157,6 +173,7 @@ class LTLfImplies(ImpliesDeltaConvertible, LTLfFormula):
 
     def to_LDLf(self):
         return self._convert().to_LDLf()
+
 
 class LTLfEquivalence(EquivalenceDeltaConvertible, LTLfCommBinaryOperator):
     And = LTLfAnd
@@ -259,7 +276,6 @@ class LTLfEventually(UnaryOperator, DeltaConvertibleFormula, LTLfTemporalFormula
         # else:
         #     return PLOr([self.f._delta(i, epsilon), LTLfNext(self)._delta(i, epsilon)])
 
-
     def to_LDLf(self):
         # return self._convert().to_LDLf()
         return LDLfDiamond(RegExpStar(RegExpPropositional(PLTrue())), LDLfAnd([self.f.to_LDLf(), LDLfNot(LDLfEnd())]))
@@ -281,6 +297,7 @@ class LTLfAlways(UnaryOperator, DeltaConvertibleFormula, LTLfTemporalFormula):
     def to_LDLf(self):
         return self._convert().to_LDLf()
         # return LDLfBox(RegExpStar(RegExpPropositional(PLTrue())), LDLfOr([self.f.to_LDLf(), LDLfNot(LDLfEnd())]))
+
 
 class LTLfRelease(DualBinaryOperatorNNF, BaseConvertibleFormula, LTLfTemporalFormula):
     operator_symbol = "R"

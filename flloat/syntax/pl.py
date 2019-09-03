@@ -4,11 +4,17 @@ from typing import Set
 
 
 from flloat.base.Alphabet import _Alphabet, Alphabet
-from flloat.base.Formula import Formula, CommutativeBinaryOperator, BinaryOperator, AtomicFormula
+from flloat.base.Formula import (
+    Formula, CommutativeBinaryOperator,
+    BinaryOperator, AtomicFormula
+    )
 from flloat.base.Symbol import Symbol
 from flloat.base.Symbols import Symbols
 from flloat.base.convertible import ImpliesConvertible, EquivalenceConvertible
-from flloat.base.nnf import NNF, NotNNF, DualBinaryOperatorNNF, DualCommutativeOperatorNNF
+from flloat.base.nnf import (
+    NNF, NotNNF,
+    DualBinaryOperatorNNF, DualCommutativeOperatorNNF
+    )
 from flloat.base.truths import NotTruth, AndTruth, OrTruth, Truth
 from flloat.semantics.pl import PLInterpretation
 from flloat.utils import powerset, _powerset, MAX_CACHE_SIZE
@@ -18,6 +24,7 @@ class PLTruth(Truth):
     @abstractmethod
     def truth(self, i: PLInterpretation, *args):
         raise NotImplementedError
+
 
 class PLFormula(Formula, PLTruth, NNF):
     def __init__(self):
@@ -45,7 +52,8 @@ class PLFormula(Formula, PLTruth, NNF):
     @lru_cache(maxsize=MAX_CACHE_SIZE)
     def minimal_models(self, alphabet: _Alphabet) -> Set[PLInterpretation]:
         """Find models of min size (i.e. the less number of proposition to True).
-        Very trivial (and inefficient) algorithm: BRUTE FORCE on all the possible interpretations."""
+        Very trivial (and inefficient) algorithm:
+        BRUTE FORCE on all the possible interpretations."""
         models = self.all_models(alphabet)
 
         minimal_models = set()
@@ -70,6 +78,7 @@ class PLFormula(Formula, PLTruth, NNF):
     def _find_atomics(self):
         raise NotImplementedError
 
+
 class PLBinaryOperator(BinaryOperator, PLFormula):
     # def __init__(self, formulas):
     #     PLFormula.__init__(self)
@@ -83,6 +92,7 @@ class PLBinaryOperator(BinaryOperator, PLFormula):
             except:
                 res.add(subf)
         return res
+
 
 class PLCommBinaryOperator(DualCommutativeOperatorNNF, PLFormula):
     # def __init__(self, formulas):
@@ -104,7 +114,7 @@ class PLAtomic(AtomicFormula, PLFormula):
     #     PLFormula.__init__(self)
     #     AtomicFormula.__init__(self, s)
 
-    def truth(self, i:PLInterpretation, *args):
+    def truth(self, i: PLInterpretation, *args):
         return self.s in i
 
     def _to_nnf(self):
@@ -119,6 +129,7 @@ class PLAtomic(AtomicFormula, PLFormula):
     def _find_atomics(self):
         return {self}
 
+
 class PLTrue(PLAtomic):
     def __init__(self):
         PLAtomic.__init__(self, Symbol(Symbols.TRUE.value))
@@ -131,6 +142,7 @@ class PLTrue(PLAtomic):
 
     def find_labels(self):
         return set()
+
 
 class PLFalse(PLAtomic):
     def __init__(self):

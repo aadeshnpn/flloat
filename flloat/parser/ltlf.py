@@ -1,9 +1,12 @@
-from flloat.base.Symbol import Symbol
+from flloat.base.Symbol import Symbol, MappingPredicate
 from flloat.base.Symbols import Symbols
 from flloat.base.parsing import Lexer, Parser
 
-from flloat.syntax.ltlf import LTLfNext, LTLfNot, LTLfUntil, LTLfEquivalence, LTLfImplies, LTLfOr, LTLfAnd, \
-    LTLfEventually, LTLfAlways, LTLfAtomic, LTLfRelease, LTLfTrue, LTLfFalse, LTLfWeakNext
+from flloat.syntax.ltlf import (
+    LTLfNext, LTLfNot, LTLfUntil, LTLfEquivalence, LTLfImplies, LTLfOr,
+    LTLfAnd, LTLfEventually, LTLfAlways, LTLfAtomic, LTLfRelease,
+    LTLfTrue, LTLfFalse, LTLfWeakNext
+    )
 from flloat.syntax.pl import PLTrue, PLFalse, PLAtomic
 from flloat.utils import sym2regexp
 
@@ -49,7 +52,6 @@ class LTLfLexer(Lexer):
     t_EVENTUALLY        = sym2regexp(Symbols.EVENTUALLY)
     t_ALWAYS            = sym2regexp(Symbols.ALWAYS)
     t_RELEASE           = sym2regexp(Symbols.RELEASE)
-
 
     def t_ATOM(self, t):
         r'[a-zA-Z_][a-zA-Z_0-9]*'
@@ -131,6 +133,79 @@ class LTLfParser(Parser):
         p[0] = p[2]
 
 
+class LTLfParserF(Parser):
+
+    def __init__(self):
+        lexer = LTLfLexer()
+        precedence = (
+            ('left', 'UNTIL', 'EVENTUALLY', 'ALWAYS', 'RELEASE'),
+            ('right', 'NEXT', 'WEAK_NEXT'),
+            ('left',  'EQUIVALENCE'),
+            ('left',  'IMPLIES'),
+            ('left',  'OR'),
+            ('left',  'AND'),
+            ('right', 'NOT'),
+
+        )
+        super().__init__("ltlf", lexer.tokens, lexer, precedence)
+
+    def p_formula(self, p):
+        """formula : formula EQUIVALENCE formula
+                   | formula IMPLIES formula
+                   | formula OR formula
+                   | formula AND formula
+                   | formula UNTIL formula
+                   | formula RELEASE formula
+                   | EVENTUALLY formula
+                   | ALWAYS formula
+                   | NEXT formula
+                   | WEAK_NEXT formula
+                   | NOT formula
+                   | TRUE
+                   | FALSE
+                   | ATOM"""
+        if len(p) == 2:
+            if p[1] == Symbols.TRUE.value:
+                p[0] = LTLfTrue()
+            elif p[1] == Symbols.FALSE.value:
+                p[0] = LTLfFalse()
+            else:
+                p[0] = LTLfAtomic(Symbol(p[1]))
+        elif len(p) == 3:
+            if p[1] == Symbols.NEXT.value:
+                p[0] = LTLfNext(p[2])
+            elif p[1] == Symbols.WEAK_NEXT.value:
+                p[0] = LTLfWeakNext(p[2])
+            elif p[1] == Symbols.EVENTUALLY.value:
+                p[0] = LTLfEventually(p[2])
+            elif p[1] == Symbols.ALWAYS.value:
+                p[0] = LTLfAlways(p[2])
+            elif p[1] == Symbols.NOT.value:
+                p[0] = LTLfNot(p[2])
+        elif len(p) == 4:
+            l, o, r = p[1:]
+            if o == Symbols.EQUIVALENCE.value:
+                p[0] = LTLfEquivalence([l, r])
+            elif o == Symbols.IMPLIES.value:
+                p[0] = LTLfImplies([l, r])
+            elif o == Symbols.OR.value:
+                p[0] = LTLfOr([l, r])
+            elif o == Symbols.AND.value:
+                p[0] = LTLfAnd([l, r])
+            elif o == Symbols.UNTIL.value:
+                p[0] = LTLfUntil([l, r])
+            elif o == Symbols.RELEASE.value:
+                p[0] = LTLfRelease([l, r])
+            else:
+                raise ValueError
+        else:
+            raise ValueError
+
+    def p_expr_paren(self, p):
+        """formula : LPAREN formula RPAREN"""
+        p[0] = p[2]
+
+
 if __name__ == '__main__':
     parser = LTLfParser()
     while True:
@@ -138,6 +213,7 @@ if __name__ == '__main__':
             s = input('calc > ')
         except EOFError:
             break
-        if not s: continue
+        if not s:
+            continue
         result = parser(s)
         print(result)

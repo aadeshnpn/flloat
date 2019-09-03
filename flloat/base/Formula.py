@@ -17,8 +17,9 @@ class Formula(Hashable):
     def simplify(self):
         return self
 
+
 class AtomicFormula(Formula):
-    def __init__(self, s:Symbol):
+    def __init__(self, s: Symbol):
         super().__init__()
         self.s = s
 
@@ -30,6 +31,7 @@ class AtomicFormula(Formula):
 
     def find_labels(self):
         return {self.s}
+
 
 class Operator(Formula):
     base_expression = Symbols.ROUND_BRACKET_LEFT.value + "%s" + Symbols.ROUND_BRACKET_RIGHT.value
@@ -64,15 +66,14 @@ CommOperatorChilds = Set[Formula]
 class BinaryOperator(Operator):
     """A generic binary formula"""
 
-
-    def __init__(self, formulas:OperatorChilds):
+    def __init__(self, formulas: OperatorChilds):
         super().__init__()
         assert len(formulas) >= 2
         self.formulas = tuple(formulas)
         self.formulas = self._popup()
 
     def __str__(self):
-        return "(" + (" "+self.operator_symbol+" ").join(map(str,self.formulas)) + ")"
+        return "(" + (" "+self.operator_symbol+" ").join(map(str, self.formulas)) + ")"
 
     def _members(self):
         return (self.operator_symbol, self.formulas)
@@ -92,11 +93,11 @@ class BinaryOperator(Operator):
     def find_labels(self):
         return set.union(*map(lambda f: f.find_labels(), self.formulas))
 
+
 class CommutativeBinaryOperator(BinaryOperator):
     """A generic commutative binary formula"""
 
-
-    def __init__(self, formulas:OperatorChilds, idempotence=True):
+    def __init__(self, formulas: OperatorChilds, idempotence=True):
         # Assuming idempotence: e.g. A & A === A
         super().__init__(formulas)
         self.idempotence = idempotence
@@ -116,7 +117,6 @@ class CommutativeBinaryOperator(BinaryOperator):
         else:
             return self
 
-
     def _members(self):
         if self.idempotence:
             return (self.operator_symbol, self.members)
@@ -129,6 +129,6 @@ class CommutativeBinaryOperator(BinaryOperator):
 
     def __str__(self):
         if self.idempotence:
-            return "(" + (" "+self.operator_symbol+" ").join(map(str,self.members)) + ")"
+            return "(" + (" "+self.operator_symbol+" ").join(map(str, self.members)) + ")"
         else:
             return super().__str__()
