@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Library wide enum classes."""
 
 from enum import Enum
@@ -9,8 +10,6 @@ class Symbols(Enum):
     NOT = "!"
     AND = "&"
     OR = "|"
-    # EXISTS = "∃"
-    # FORALL = "Ɐ"
     EQUAL = "="
     IMPLIES = "->"
     EQUIVALENCE = "<->"
@@ -30,12 +29,8 @@ class Symbols(Enum):
     EVENTUALLY_BRACKET_RIGHT = ">"
     ALWAYS_BRACKET_LEFT = "["
     ALWAYS_BRACKET_RIGHT = "]"
-    # TOP = "⊤"
-    # BOTTOM = "⊥"
     LAST = "last"
     END = "end"
-    # LOGICAL_TRUE = "⊤⊤"
-    # LOGICAL_FALSE = "⊥⊥"
     LOGICAL_TRUE = "tt"
     LOGICAL_FALSE = "ff"
     CARET = "^"

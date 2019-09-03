@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flloat.base.Symbols import Symbols, ALL_SYMBOLS
+from flloat.base.Symbols import Symbols, ALL_SYMBOLS, Operators, ALL_OPERATORS
 from flloat.base.hashable import Hashable
 
 
@@ -65,3 +65,14 @@ class LastSymbol(Symbol):
 class MappingPredicate(Hashable):
     def __init__(self, states, operator):
         Hashable.__init__(self)
+        if operator not in ALL_OPERATORS:
+            raise ("Operator not defined in global operator")
+        else:
+            self.state = states
+            self.operator = operator
+
+    def __repr__(self):
+        return str(self.state) + " ^ " + str(self.operator)
+
+    def _members(self):
+        return (self.state, self.operator)
