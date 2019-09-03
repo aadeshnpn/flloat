@@ -1,7 +1,7 @@
 from abc import abstractmethod, ABC
 from typing import Sequence, Set
 
-from flloat.base.Symbol import Symbol
+from flloat.base.Symbol import Symbol, MappingPredicate
 from flloat.base.Symbols import Symbols
 from flloat.base.hashable import Hashable
 
@@ -20,6 +20,21 @@ class Formula(Hashable):
 
 class AtomicFormula(Formula):
     def __init__(self, s: Symbol):
+        super().__init__()
+        self.s = s
+
+    def _members(self):
+        return self.s
+
+    def __str__(self):
+        return str(self.s)
+
+    def find_labels(self):
+        return {self.s}
+
+
+class AtomicGFormula(Formula):
+    def __init__(self, s: MappingPredicate):
         super().__init__()
         self.s = s
 
