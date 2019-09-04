@@ -49,7 +49,7 @@ class Operators(Enum):
     GREATER = ">"
     GREATER_EQUALS = ">="
     IN = "in"
-    NOT_IN = "not in"
+    NOT_IN = "not_in"
 
 
 ALL_SYMBOLS = {v.value for v in Symbols}

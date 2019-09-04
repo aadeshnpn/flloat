@@ -1,6 +1,8 @@
 from abc import abstractmethod
 
-from flloat.base.Formula import Formula, BinaryOperator, CommutativeBinaryOperator
+from flloat.base.Formula import (
+    Formula, BinaryOperator, CommutativeBinaryOperator
+    )
 from flloat.base.misc import Delta
 from flloat.base.nnf import NNF
 from flloat.base.truths import Truth, ImpliesTruth, EquivalenceTruth
@@ -25,7 +27,7 @@ class BaseConvertibleFormula(ConvertibleFormula, Truth, NNF):
 
 
 class DeltaConvertibleFormula(BaseConvertibleFormula, Delta):
-    def _delta(self, i:PLInterpretation, epsilon=False):
+    def _delta(self, i: PLInterpretation, epsilon=False):
         return self._convert().delta(i, epsilon)
 
 
@@ -51,10 +53,13 @@ class ImpliesConvertible(ImpliesTruth, BaseConvertibleFormula, BinaryOperator):
         res = self.Or([self.Not(a), b])
         return res
 
+
 class ImpliesDeltaConvertible(ImpliesConvertible, DeltaConvertibleFormula):
     pass
 
-class EquivalenceConvertible(EquivalenceTruth, BaseConvertibleFormula, CommutativeBinaryOperator):
+
+class EquivalenceConvertible(
+        EquivalenceTruth, BaseConvertibleFormula, CommutativeBinaryOperator):
     @property
     def And(self):
         raise NotImplementedError
@@ -75,5 +80,7 @@ class EquivalenceConvertible(EquivalenceTruth, BaseConvertibleFormula, Commutati
         res = self.Or([pos, neg])
         return res
 
-class EquivalenceDeltaConvertible(EquivalenceConvertible, DeltaConvertibleFormula):
+
+class EquivalenceDeltaConvertible(
+        EquivalenceConvertible, DeltaConvertibleFormula):
     pass

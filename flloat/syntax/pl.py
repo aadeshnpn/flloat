@@ -6,7 +6,7 @@ from typing import Set
 from flloat.base.Alphabet import _Alphabet, Alphabet
 from flloat.base.Formula import (
     Formula, CommutativeBinaryOperator,
-    BinaryOperator, AtomicFormula
+    BinaryOperator, AtomicFormula, AtomicGFormula
     )
 from flloat.base.Symbol import Symbol
 from flloat.base.Symbols import Symbols
@@ -116,6 +116,34 @@ class PLAtomic(AtomicFormula, PLFormula):
 
     def truth(self, i: PLInterpretation, *args):
         return self.s in i
+
+    def _to_nnf(self):
+        return self
+
+    def negate(self):
+        return PLNot(self)
+
+    def find_labels(self):
+        return {self.s}
+
+    def _find_atomics(self):
+        return {self}
+
+
+class PLGAtomic(AtomicGFormula, PLFormula):
+    # def __init__(self, s):
+    #     PLFormula.__init__(self)
+    #     AtomicFormula.__init__(self, s)
+
+    def truth(self, i: PLInterpretation, *args):
+        # return self.s in i
+        print('Interpretations', i)
+        print('symbol', self.s)
+        try:
+            return eval(
+                self.s.state + ' ' + self.s.operator + ' ' + i)
+        except AttributeError:
+            return self.s in i
 
     def _to_nnf(self):
         return self

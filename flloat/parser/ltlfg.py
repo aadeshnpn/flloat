@@ -1,17 +1,17 @@
-from flloat.base.Symbol import Symbol
+from flloat.base.Symbol import Symbol, FunctionSymbol
 from flloat.base.Symbols import Symbols
 from flloat.base.parsing import Lexer, Parser
 
-from flloat.syntax.ltlf import (
+from flloat.syntax.ltlfg import (
     LTLfNext, LTLfNot, LTLfUntil, LTLfEquivalence, LTLfImplies, LTLfOr,
-    LTLfAnd, LTLfEventually, LTLfAlways, LTLfAtomic, LTLfRelease,
+    LTLfAnd, LTLfEventually, LTLfAlways, LTLfgAtomic, LTLfRelease,
     LTLfTrue, LTLfFalse, LTLfWeakNext
     )
-from flloat.syntax.pl import PLTrue, PLFalse, PLAtomic
+from flloat.syntax.pl import PLTrue, PLFalse, PLAtomic, PLGAtomic
 from flloat.utils import sym2regexp
 
 
-class LTLfLexer(Lexer):
+class LTLfGLexer(Lexer):
 
     def __init__(self):
         super().__init__()
@@ -37,6 +37,8 @@ class LTLfLexer(Lexer):
         'EQUIVALENCE',
         'LPAREN',
         'RPAREN',
+        # 'LSPAREN',
+        # 'RSPAREN',
     ) + tuple(reserved.values())
 
     # Regular expression rules for simple tokens
@@ -47,6 +49,8 @@ class LTLfLexer(Lexer):
     t_EQUIVALENCE       = sym2regexp(Symbols.EQUIVALENCE)
     t_LPAREN            = sym2regexp(Symbols.ROUND_BRACKET_LEFT)
     t_RPAREN            = sym2regexp(Symbols.ROUND_BRACKET_RIGHT)
+    # t_LSPAREN            = sym2regexp(Symbols.ALWAYS_BRACKET_LEFT)
+    # t_RSPAREN            = sym2regexp(Symbols.ALWAYS_BRACKET_RIGHT)
     t_NEXT              = sym2regexp(Symbols.NEXT)
     t_UNTIL             = sym2regexp(Symbols.UNTIL)
     t_EVENTUALLY        = sym2regexp(Symbols.EVENTUALLY)
@@ -54,16 +58,16 @@ class LTLfLexer(Lexer):
     t_RELEASE           = sym2regexp(Symbols.RELEASE)
 
     def t_ATOM(self, t):
-        r'[a-zA-Z_][a-zA-Z_0-9]*'
-        t.type = LTLfLexer.reserved.get(t.value, 'ATOM')  # Check for reserved words
+        r'[A-Za-z_][\[\]a-zA-Z_0-9,=<>!]*'
+        t.type = LTLfGLexer.reserved.get(t.value, 'ATOM')  # Check for reserved words
         return t
 
 
 # Yacc example
-class LTLfParser(Parser):
+class LTLfGParser(Parser):
 
     def __init__(self):
-        lexer = LTLfLexer()
+        lexer = LTLfGLexer()
         precedence = (
             ('left', 'UNTIL', 'EVENTUALLY', 'ALWAYS', 'RELEASE'),
             ('right', 'NEXT', 'WEAK_NEXT'),
@@ -97,7 +101,7 @@ class LTLfParser(Parser):
             elif p[1] == Symbols.FALSE.value:
                 p[0] = LTLfFalse()
             else:
-                p[0] = LTLfAtomic(Symbol(p[1]))
+                p[0] = LTLfgAtomic(FunctionSymbol(p[1]))
         elif len(p) == 3:
             if p[1] == Symbols.NEXT.value:
                 p[0] = LTLfNext(p[2])
