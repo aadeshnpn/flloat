@@ -17,6 +17,7 @@ class _PLGInterpretation(Interpretation):
 
     def __contains__(self, item: FunctionSymbol):
         try:
+            print('Inter', item.state, item.operator, self.true_propositions)
             return eval(
                 item.state + ' ' + item.operator +
                 ' ' + self.true_propositions)
@@ -64,3 +65,47 @@ class _PLGInterpretationConstructor(ObjConstructor):
 
 plginterpretation_factory = ObjFactory(_PLGInterpretation)
 PLGInterpretation = _PLGInterpretationConstructor(plginterpretation_factory)
+
+
+class FiniteTrace(Interpretation):
+    def __init__(self, trace: List[PLGInterpretation]):
+        super().__init__()
+        self.trace = trace
+
+    def _members(self):
+        return tuple(self.trace)
+
+    @staticmethod
+    def fromSymbolSets(l: List[Set[Symbol]]):
+        return FiniteTrace([PLGInterpretation(s) for s in l])
+
+    @staticmethod
+    def fromStringSets(l: List[Set[str]]):
+        return FiniteTrace(
+            [PLGInterpretation(frozenset(
+                {Symbol(string) for string in s})) for s in l])
+
+    def length(self):
+        return len(self.trace)
+
+    def last(self):
+        return len(self.trace)-1
+
+    def _position_is_legal(self, position: int):
+        return position >= 0 and position <= self.last()
+
+    def get(self, position: int) -> PLGInterpretation:
+        assert self._position_is_legal(position)
+        return self.trace[position]
+
+    def segment(self, start: int, end: int):
+        if not self._position_is_legal(
+                start) or not self._position_is_legal(end):
+            raise ValueError("Start or end position are not valid")
+        return FiniteTrace(self.trace[start: end])
+
+    def __str__(self):
+        return "Trace (length=%s)" % self.length() + "\n\t" + \
+               "\n\t".join("%d: {"%i + ", ".join(map(str, sorted(e))) + "}" for i, e in enumerate(self.trace))
+
+

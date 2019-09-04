@@ -16,13 +16,15 @@ from flloat.base.nnf import (
     DualBinaryOperatorNNF, DualCommutativeOperatorNNF
     )
 from flloat.base.truths import NotTruth, AndTruth, OrTruth, Truth
-from flloat.semantics.pl import PLInterpretation
+# from flloat.semantics.pl import PLInterpretation
+from flloat.semantics.ltlfg import PLGInterpretation
+
 from flloat.utils import powerset, _powerset, MAX_CACHE_SIZE
 
 
 class PLTruth(Truth):
     @abstractmethod
-    def truth(self, i: PLInterpretation, *args):
+    def truth(self, i: PLGInterpretation, *args):
         raise NotImplementedError
 
 
@@ -34,7 +36,7 @@ class PLFormula(Formula, PLTruth, NNF):
         self._minimal_models = None
         self._atoms = None
 
-    def all_models(self, alphabet: _Alphabet) -> Set[PLInterpretation]:
+    def all_models(self, alphabet: _Alphabet) -> Set[PLGInterpretation]:
         """Find all the possible interpretations given a set of symbols"""
 
         all_possible_interpretations = alphabet.powerset().symbols
@@ -42,7 +44,7 @@ class PLFormula(Formula, PLTruth, NNF):
         for i in all_possible_interpretations:
             # compute current Interpretation, considering False
             # all propositional symbols not present in current interpretation
-            current_interpretation = PLInterpretation(i)
+            current_interpretation = PLGInterpretation(i)
             if self.truth(current_interpretation):
                 all_models.add(current_interpretation)
 
@@ -50,7 +52,7 @@ class PLFormula(Formula, PLTruth, NNF):
         return all_models
 
     @lru_cache(maxsize=MAX_CACHE_SIZE)
-    def minimal_models(self, alphabet: _Alphabet) -> Set[PLInterpretation]:
+    def minimal_models(self, alphabet: _Alphabet) -> Set[PLGInterpretation]:
         """Find models of min size (i.e. the less number of proposition to True).
         Very trivial (and inefficient) algorithm:
         BRUTE FORCE on all the possible interpretations."""
@@ -114,7 +116,7 @@ class PLAtomic(AtomicFormula, PLFormula):
     #     PLFormula.__init__(self)
     #     AtomicFormula.__init__(self, s)
 
-    def truth(self, i: PLInterpretation, *args):
+    def truth(self, i: PLGInterpretation, *args):
         return self.s in i
 
     def _to_nnf(self):
@@ -135,7 +137,7 @@ class PLGAtomic(AtomicGFormula, PLFormula):
     #     PLFormula.__init__(self)
     #     AtomicFormula.__init__(self, s)
 
-    def truth(self, i: PLInterpretation, *args):
+    def truth(self, i: PLGInterpretation, *args):
         # return self.s in i
         print('Interpretations', i)
         print('symbol', self.s)
