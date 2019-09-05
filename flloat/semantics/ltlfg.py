@@ -1,7 +1,10 @@
+from abc import abstractmethod
 from typing import FrozenSet, Set, List
 
 from flloat.base.Interpretation import Interpretation
 from flloat.base.Symbol import Symbol, FunctionSymbol
+from flloat.base.Symbols import Operators
+from flloat.base.truths import Truth
 from flloat.utils import ObjFactory, ObjConstructor
 
 
@@ -17,10 +20,32 @@ class _PLGInterpretation(Interpretation):
 
     def __contains__(self, item: FunctionSymbol):
         try:
-            print('Inter', item.state, item.operator, self.true_propositions)
-            return eval(
-                item.state + ' ' + item.operator +
-                ' ' + self.true_propositions)
+            # print('inter', item, self.true_propositions, type(item))
+            # print(dir(item))
+            # print('Inter', item.state, item.operator, self.true_propositions)
+            # return eval(
+            #    item.state + ' ' + item.operator +
+            #    ' ' + self.true_propositions)
+
+            # if item.operator in {Operators.IN.value, Operators.NOT_IN.value}:
+            #    eval_str = item.state + ' ' + item.operator + \
+            #        ' ' + self.true_propositions.__str__()
+            #    print('contains', eval_str)
+            #    result = eval(eval_str)
+            #    return result
+            if item.operator == Operators.IN.value:
+                return item.state in self.true_propositions
+            elif item.operator == Operators.NOT_IN.value:
+                return item.state not in self.true_propositions
+            else:
+                for val in self.true_propositions:
+                    result = eval(
+                        item.state + ' ' + item.operator +
+                        ' ' + val
+                        )
+                    if result is True:
+                        return True
+                return False
         except AttributeError:
             return item in self.true_propositions
         # return item in self.true_propositions
@@ -109,3 +134,7 @@ class FiniteTrace(Interpretation):
                "\n\t".join("%d: {"%i + ", ".join(map(str, sorted(e))) + "}" for i, e in enumerate(self.trace))
 
 
+class FiniteTraceTruth(Truth):
+    @abstractmethod
+    def truth(self, i: FiniteTrace, pos: int):
+        raise NotImplementedError

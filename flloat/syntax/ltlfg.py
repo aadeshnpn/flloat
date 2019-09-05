@@ -19,7 +19,7 @@ from flloat.base.truths import Truth, NotTruth, OrTruth, AndTruth
 from flloat.utils import MAX_CACHE_SIZE
 from flloat.flloat import DFAOTF, to_automaton, to_automaton_
 # from flloat.semantics.ldlf import FiniteTrace, FiniteTraceTruth
-from flloat.semantics.ltlfg import FiniteTrace
+from flloat.semantics.ltlfg import FiniteTrace, FiniteTraceTruth
 # from flloat.semantics.pl import PLInterpretation, PLFalseInterpretation
 from flloat.semantics.ltlfg import PLGInterpretation, PLGFalseInterpretation
 

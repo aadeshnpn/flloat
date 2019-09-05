@@ -9,7 +9,7 @@ from flloat.base.Formula import (
     BinaryOperator, AtomicFormula, AtomicGFormula
     )
 from flloat.base.Symbol import Symbol
-from flloat.base.Symbols import Symbols
+from flloat.base.Symbols import Symbols, Operators
 from flloat.base.convertible import ImpliesConvertible, EquivalenceConvertible
 from flloat.base.nnf import (
     NNF, NotNNF,
@@ -139,11 +139,31 @@ class PLGAtomic(AtomicGFormula, PLFormula):
 
     def truth(self, i: PLGInterpretation, *args):
         # return self.s in i
-        print('Interpretations', i)
-        print('symbol', self.s)
+        # print('Interpretations', i)
+        # print('symbol', self.s)
         try:
-            return eval(
-                self.s.state + ' ' + self.s.operator + ' ' + i)
+            # if self.s.operator in {Operators.IN.value, Operators.NOT_IN.value}:
+            #    eval_str = self.s.state + ' ' + self.s.operator + \
+            #        ' ' + i.__str__()
+            #    print('truth', eval_str)
+            #    result = eval(eval_str)
+            #    return result
+            if self.s.operator == Operators.IN.value:
+                return self.s.state in i
+            elif self.s.operator == Operators.NOT_IN.value:
+                return self.s.state not in i
+            else:
+                for val in i:
+                    result = eval(
+                        self.s.state + ' ' + self.s.operator +
+                        ' ' + val
+                        )
+                    if result is True:
+                        return True
+                return False
+
+            # return eval(
+            #    self.s.state + ' ' + self.s.operator + ' ' + i)
         except AttributeError:
             return self.s in i
 

@@ -19,14 +19,15 @@ class FunctionSymbol(Symbol):
         super().__init__(name)
         self.name = name
         try:
-            self._parse
+            self._parse()
         except AttributeError:
-            return Symbol(self.name)
+            # return Symbol(self.name)
+            pass
 
     def _parse(self):
         temp = re.match('[A-Za-z0-9]*', self.name)
         self.fname = temp.group()
-        args = re.search('\[[a-zA-Z,_]*\]', self.name)
+        args = re.search('\[[a-zA-Z0-9,_<>=!]*\]', self.name)
         args = args.group()
         arg1, arg2 = args.split(',')
         self.state = arg1[1:]

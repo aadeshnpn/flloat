@@ -2,12 +2,16 @@ from abc import abstractmethod, ABC
 from functools import lru_cache
 from typing import Set
 
-from flloat.base.Formula import Formula, CommutativeBinaryOperator, UnaryOperator, BinaryOperator, OperatorChilds, \
-    AtomicFormula
+from flloat.base.Formula import (
+    Formula, CommutativeBinaryOperator, UnaryOperator,
+    BinaryOperator, OperatorChilds, AtomicFormula
+    )
 from flloat.base.Symbol import Symbol
 from flloat.base.Symbols import Symbols
-from flloat.base.convertible import DeltaConvertibleFormula, ImpliesDeltaConvertible, EquivalenceDeltaConvertible, \
-    ConvertibleFormula
+from flloat.base.convertible import (
+    DeltaConvertibleFormula, ImpliesDeltaConvertible,
+    EquivalenceDeltaConvertible, ConvertibleFormula
+)
 from flloat.base.misc import Delta
 from flloat.base.nnf import NNF, NotNNF, DualBinaryOperatorNNF, DualNNF
 from flloat.base.truths import NotTruth, AndTruth, OrTruth, Truth
@@ -23,6 +27,7 @@ class RegExpTruth(Truth):
     def truth(self, tr: FiniteTrace, start: int=0, end: int=0):
         raise NotImplementedError
 
+
 class LDLfFormula(Formula, FiniteTraceTruth, NNF, Delta):
 
     @lru_cache(maxsize=MAX_CACHE_SIZE)
@@ -31,8 +36,10 @@ class LDLfFormula(Formula, FiniteTraceTruth, NNF, Delta):
         f = self.to_nnf()
         d = f._delta(i, epsilon)
         if epsilon:
-            # By definition, if epsilon=True, then the result must be either PLTrue or PLFalse
-            # Now, the output is a Propositional Formula with only PLTrue or PLFalse as atomics
+            # By definition, if epsilon=True, then the result
+            # must be either PLTrue or PLFalse
+            # Now, the output is a Propositional Formula
+            # with only PLTrue or PLFalse as atomics
             # Hence, we just evaluate the formula with a dummy PLInterpretation
             d = PLTrue() if d.truth(PLFalseInterpretation()) else PLFalse()
         return d
@@ -45,7 +52,9 @@ class LDLfFormula(Formula, FiniteTraceTruth, NNF, Delta):
     def __repr__(self):
         return self.__str__()
 
-    def to_automaton(self, labels:Set[Symbol]=None, on_the_fly=False, determinize=False, minimize=True):
+    def to_automaton(
+            self, labels: Set[Symbol]=None, on_the_fly=False,
+            determinize=False, minimize=True):
         if labels is None:
             labels = self.find_labels()
         if on_the_fly:
@@ -69,9 +78,11 @@ class DeltaRegExp(ABC):
     def deltaBox(self, f:LDLfFormula, i: PLInterpretation, epsilon=False):
         raise NotImplementedError
 
+
 class RegExpFormula(Formula, RegExpTruth, NNF, DeltaRegExp):
 
-    # this should be never called. Just for override the inherited abstract method.
+    # this should be never called. Just for
+    # override the inherited abstract method.
     def negate(self):
         raise NotImplementedError
 
@@ -81,7 +92,7 @@ class LDLfTemporalFormula(LDLfFormula):
     def temporal_brackets(self)->str:
         raise NotImplementedError
 
-    def __init__(self, r:RegExpFormula, f:LDLfFormula):
+    def __init__(self, r: RegExpFormula, f: LDLfFormula):
         super().__init__()
         self.r = r
         self.f = f
@@ -126,7 +137,7 @@ class LDLfLogicalTrue(LDLfAtomic):
     def negate(self):
         return LDLfLogicalFalse()
 
-    def _delta(self, i:PLInterpretation, epsilon=False):
+    def _delta(self, i: PLInterpretation, epsilon=False):
         return PLTrue()
 
 
@@ -143,7 +154,7 @@ class LDLfLogicalFalse(LDLfAtomic):
     def negate(self):
         return LDLfLogicalTrue()
 
-    def _delta(self, i:PLInterpretation, epsilon=False):
+    def _delta(self, i: PLInterpretation, epsilon=False):
         return PLFalse()
 
 
@@ -167,34 +178,38 @@ class LDLfNot(NotTruth, LDLfFormula, NotNNF):
 
 class LDLfAnd(LDLfCommBinaryOperator, AndTruth, DualBinaryOperatorNNF):
 
-    def _delta(self, i:PLInterpretation, epsilon=False):
+    def _delta(self, i: PLInterpretation, epsilon=False):
         return PLAnd([f._delta(i, epsilon) for f in self.formulas])
 
 
 class LDLfOr(LDLfCommBinaryOperator, OrTruth, DualBinaryOperatorNNF):
 
-    def _delta(self, i:PLInterpretation, epsilon=False):
+    def _delta(self, i: PLInterpretation, epsilon=False):
         return PLOr([f._delta(i, epsilon) for f in self.formulas])
 
 
 class LDLfImplies(ImpliesDeltaConvertible, LDLfFormula):
     And = LDLfAnd
-    Or =  LDLfOr
+    Or = LDLfOr
     Not = LDLfNot
+
 
 class LDLfEquivalence(EquivalenceDeltaConvertible, LDLfCommBinaryOperator):
     And = LDLfAnd
     Or = LDLfOr
     Not = LDLfNot
 
+
 class LDLfDiamond(LDLfTemporalFormulaNNF, FiniteTraceTruth):
     temporal_brackets = "<>"
 
     def truth(self, i: FiniteTrace, pos: int=0):
-        return any(self.r.truth(i, pos, j) and self.f.truth(i, j) for j in range(pos, i.last()+1))
+        return any(
+            self.r.truth(i, pos, j) and self.f.truth(
+                i, j) for j in range(pos, i.last()+1))
         # last + 1 in order to include the last step
 
-    def _delta(self, i:PLInterpretation, epsilon=False):
+    def _delta(self, i: PLInterpretation, epsilon=False):
         return self.r.deltaDiamond(self.f, i, epsilon)
 
 
@@ -207,13 +222,13 @@ class LDLfBox(ConvertibleFormula, LDLfTemporalFormulaNNF):
     def truth(self, i: FiniteTrace, pos: int=0):
         return self._convert().truth(i, pos)
 
-    def _delta(self, i:PLInterpretation, epsilon=False):
+    def _delta(self, i: PLInterpretation, epsilon=False):
         d = self.r.deltaBox(self.f, i, epsilon)
         return d
 
 
 class RegExpPropositional(RegExpFormula, PLFormula):
-    def __init__(self, pl_formula:PLFormula):
+    def __init__(self, pl_formula: PLFormula):
         RegExpFormula.__init__(self)
         self.pl_formula = pl_formula
 
@@ -234,7 +249,7 @@ class RegExpPropositional(RegExpFormula, PLFormula):
     def negate(self):
         return RegExpPropositional(self.pl_formula.negate())
 
-    def deltaDiamond(self, f:LDLfFormula, i: PLInterpretation, epsilon=False):
+    def deltaDiamond(self, f: LDLfFormula, i: PLInterpretation, epsilon=False):
         if epsilon:
             return PLFalse()
         if self.pl_formula.truth(i):
@@ -243,7 +258,7 @@ class RegExpPropositional(RegExpFormula, PLFormula):
         else:
             return PLFalse()
 
-    def deltaBox(self, f:LDLfFormula, i: PLInterpretation, epsilon=False):
+    def deltaBox(self, f: LDLfFormula, i: PLInterpretation, epsilon=False):
         if epsilon:
             return PLTrue()
         if self.pl_formula.truth(i):
@@ -257,6 +272,7 @@ class RegExpPropositional(RegExpFormula, PLFormula):
 
     def _find_atomics(self):
         return self.pl_formula.find_atomics()
+
 
 class RegExpTest(UnaryOperator, RegExpFormula):
     operator_symbol = Symbols.PATH_TEST.value
@@ -276,20 +292,24 @@ class RegExpTest(UnaryOperator, RegExpFormula):
     def _to_nnf(self):
         return RegExpTest(self.f.to_nnf())
 
-    def deltaDiamond(self, f:LDLfFormula, i: PLInterpretation, epsilon=False):
+    def deltaDiamond(self, f: LDLfFormula, i: PLInterpretation, epsilon=False):
         return PLAnd([self.f._delta(i, epsilon), f._delta(i, epsilon)])
 
-    def deltaBox(self, f:LDLfFormula, i: PLInterpretation, epsilon=False):
+    def deltaBox(self, f: LDLfFormula, i: PLInterpretation, epsilon=False):
         # ff = LDLfNot(self.f).to_nnf()
         # dff = ff._delta(i, epsilon)
         # fun = f._delta(i, epsilon)
-        return PLOr([LDLfNot(self.f).to_nnf()._delta(i, epsilon), f._delta(i, epsilon)])
+        return PLOr(
+            [LDLfNot(self.f).to_nnf()._delta(
+                i, epsilon), f._delta(i, epsilon)])
 
     def find_labels(self):
         return self.f.find_labels()
 
+
 class RegExpUnion(CommutativeBinaryOperator, RegExpFormula):
     operator_symbol = Symbols.PATH_UNION.value
+
     def __init__(self, formulas):
         RegExpFormula.__init__(self)
         CommutativeBinaryOperator.__init__(self, formulas)
@@ -300,11 +320,14 @@ class RegExpUnion(CommutativeBinaryOperator, RegExpFormula):
     def _to_nnf(self):
         return RegExpUnion([r.to_nnf() for r in self.formulas_set])
 
-    def deltaDiamond(self, f:LDLfFormula, i: PLInterpretation, epsilon=False):
-        return PLOr([LDLfDiamond(r, f)._delta(i, epsilon) for r in self.formulas_set])
+    def deltaDiamond(self, f: LDLfFormula, i: PLInterpretation, epsilon=False):
+        return PLOr(
+            [LDLfDiamond(r, f)._delta(i, epsilon) for r in self.formulas_set])
 
-    def deltaBox(self, f:LDLfFormula, i: PLInterpretation, epsilon=False):
-        return PLAnd([LDLfBox(r, f)._delta(i, epsilon) for r in self.formulas_set])
+    def deltaBox(self, f: LDLfFormula, i: PLInterpretation, epsilon=False):
+        return PLAnd(
+            [LDLfBox(r, f)._delta(i, epsilon) for r in self.formulas_set])
+
 
 class RegExpSequence(BinaryOperator, RegExpFormula):
     operator_symbol = Symbols.PATH_SEQUENCE.value
@@ -320,19 +343,20 @@ class RegExpSequence(BinaryOperator, RegExpFormula):
         else:
             f2 = RegExpSequence(self.formulas[1:])
 
-        return any(f1.truth(tr, start, k) and f2.truth(tr, k, end) for k in range(start, end + 1))
-
+        return any(
+            f1.truth(tr, start, k) and f2.truth(
+                tr, k, end) for k in range(start, end + 1))
 
     def _to_nnf(self):
         return RegExpSequence([r.to_nnf() for r in self.formulas])
 
-    def deltaDiamond(self, f:LDLfFormula, i: PLInterpretation, epsilon=False):
+    def deltaDiamond(self, f: LDLfFormula, i: PLInterpretation, epsilon=False):
         res = LDLfDiamond(self.formulas[-1], f)
         for r in reversed(self.formulas[:-1]):
             res = LDLfDiamond(r, res)
         return res._delta(i, epsilon)
 
-    def deltaBox(self, f:LDLfFormula, i: PLInterpretation, epsilon=False):
+    def deltaBox(self, f: LDLfFormula, i: PLInterpretation, epsilon=False):
         res = LDLfBox(self.formulas[-1], f)
         for r in reversed(self.formulas[:-1]):
             res = LDLfBox(r, res)
@@ -359,24 +383,28 @@ class RegExpStar(UnaryOperator, RegExpFormula):
     def _to_nnf(self):
         return RegExpStar(self.f.to_nnf())
 
-    def deltaDiamond(self, f:LDLfFormula, i: PLInterpretation, epsilon=False):
-        return PLOr([f._delta(i, epsilon), LDLfDiamond(self.f, F(LDLfDiamond(self, f)))._delta(i, epsilon)])
+    def deltaDiamond(self, f: LDLfFormula, i: PLInterpretation, epsilon=False):
+        return PLOr(
+            [f._delta(i, epsilon), LDLfDiamond(
+                self.f, F(LDLfDiamond(self, f)))._delta(i, epsilon)])
 
-    def deltaBox(self, f:LDLfFormula, i: PLInterpretation, epsilon=False):
+    def deltaBox(self, f: LDLfFormula, i: PLInterpretation, epsilon=False):
         # subf = LDLfBox(self.f, T(LDLfBox(self, f)))
         # k = subf._delta(i, epsilon)
         # l = [f._delta(i, epsilon), subf]
         # ff = PLAnd(l)
-        return PLAnd([f._delta(i, epsilon), LDLfBox(self.f, T(LDLfBox(self, f)))._delta(i, epsilon)])
+        return PLAnd([f._delta(i, epsilon), LDLfBox(
+            self.f, T(LDLfBox(self, f)))._delta(i, epsilon)])
 
 
 class LDLfPropositional(DeltaConvertibleFormula, LDLfFormula):
-    def __init__(self, pl_formula:PLFormula):
+    def __init__(self, pl_formula: PLFormula):
         super().__init__()
         self.pl_formula = pl_formula
 
     def _convert(self):
-        return LDLfDiamond(RegExpPropositional(self.pl_formula), LDLfLogicalTrue())
+        return LDLfDiamond(
+            RegExpPropositional(self.pl_formula), LDLfLogicalTrue())
 
     def _members(self):
         return (LDLfPropositional, self.pl_formula)
@@ -415,10 +443,10 @@ class F(Formula, Delta, NNF):
     def __str__(self):
         return "_".join(map(str, self._members()))
 
-    def delta(self, i:PLInterpretation, epsilon=False):
+    def delta(self, i: PLInterpretation, epsilon=False):
         return self._delta(i, epsilon)
 
-    def _delta(self,i:PLInterpretation, epsilon=False):
+    def _delta(self, i: PLInterpretation, epsilon=False):
         return PLFalse()
 
     def _to_nnf(self):
@@ -445,7 +473,7 @@ class T(Formula, Delta, NNF):
     def delta(self, i: PLInterpretation, epsilon=False):
         return self._delta(i, epsilon)
 
-    def _delta(self, i:PLInterpretation, epsilon=False):
+    def _delta(self, i: PLInterpretation, epsilon=False):
         return PLTrue()
 
     def _to_nnf(self):
@@ -457,7 +485,8 @@ class T(Formula, Delta, NNF):
     def find_labels(self):
         return super().find_labels()
 
-def _expand(f:Formula):
+
+def _expand(f: Formula):
     if isinstance(f, F) or isinstance(f, T):
         return _expand(f.f)
     # elif isinstance(f, LDLfLogicalTrue):
