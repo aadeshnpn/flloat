@@ -18,15 +18,138 @@ from flloat.syntax.ltlfg import (
 from flloat.syntax.pl import PLGAtomic, PLTrue, PLFalse, PLAnd, PLOr
 
 
+def test_ltlfg_mdp():
+    parser = LTLfGParser()
+    formula = "S11 R S88"
+    parsed_formula = parser(formula)
+    a = LTLfgAtomic(FunctionSymbol('S11'))
+    b = LTLfgAtomic(FunctionSymbol('S88'))
+    # S and E are action. S11.. are states. The MDP world is 8x8
+    t1 = FiniteTrace.fromStringSets([
+        {'S11', 'S', 'S21', 'E', 'S22', 'E', 'S23', 'E', 'S24',
+        'E', 'S25', 'E', 'S26', 'E', 'S27', 'S', 'S37',
+        'S', 'S47', 'S', 'S57', 'S', 'S67', 'E', 'S68',
+        'S', 'S78', 'S', 'S88'}
+    ])
+    assert parsed_formula == LTLfRelease([a, b])
+    assert parsed_formula.truth(t1) is True
+
+
+def test_ltlfg_mdp_trace():
+    parser = LTLfGParser()
+    formula = "S11 R S88"
+    parsed_formula = parser(formula)
+    a = LTLfgAtomic(FunctionSymbol('S11'))
+    b = LTLfgAtomic(FunctionSymbol('S88'))
+    # S and E are action. S11.. are states. The MDP world is 8x8
+    t1 = FiniteTrace.fromStringSets([
+        {'S11'},
+        {'S11', 'S'},
+        {'S11', 'S', 'E'},
+        {'S11', 'S', 'E', 'S22'},
+        {'S11', 'S', 'E', 'S22', 'E'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27',
+         'S'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27',
+         'S', 'S37'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27',
+         'S', 'S37', 'S'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27',
+         'S', 'S37', 'S', 'S47'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27',
+         'S', 'S37', 'S', 'S47', 'S'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27',
+         'S', 'S37', 'S', 'S47', 'S', 'S57'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27',
+         'S', 'S37', 'S', 'S47', 'S', 'S57', 'S'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27',
+         'S', 'S37', 'S', 'S47', 'S', 'S57', 'S', 'S67'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27',
+         'S', 'S37', 'S', 'S47', 'S', 'S57', 'S', 'S67', 'E'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27',
+         'S', 'S37', 'S', 'S47', 'S', 'S57', 'S', 'S67', 'E', 'S68'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27',
+         'S', 'S37', 'S', 'S47', 'S', 'S57', 'S', 'S67', 'E', 'S68', 'S'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27',
+         'S', 'S37', 'S', 'S47', 'S', 'S57', 'S', 'S67', 'E', 'S68', 'S',
+         'S78'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27',
+         'S', 'S37', 'S', 'S47', 'S', 'S57', 'S', 'S67', 'E', 'S68', 'S',
+         'S78', 'S'},
+        {'S11', 'S', 'E', 'S22', 'E', 'S23', 'E', 'S24', 'S', 'S21', 'E',
+         'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27',
+         'S', 'S37', 'S', 'S47', 'S', 'S57', 'S', 'S67', 'E', 'S68', 'S',
+         'S78', 'S', 'S88'}
+    ])
+    assert parsed_formula == LTLfRelease([a, b])
+    assert parsed_formula.truth(t1) is False
+
+
+def test_ltlfg_velocity():
+    parser = LTLfGParser()
+    formula = "Pv[19,<] R Pv[55,>]"
+    parsed_formula = parser(formula)
+    t1 = FiniteTrace.fromStringSets([
+        {'20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30',
+         '31', '32', '33', '34', '35', '36', '37', '50', '51', '52', '53'}
+    ])
+    assert parsed_formula.truth(t1) is True
+
+
+def test_ltlfg_set():
+    parser = LTLfGParser()
+    formula = "Ps[A,not_in] R Ps[B,not_in]"
+    parsed_formula = parser(formula)
+    t1 = FiniteTrace.fromStringSets([
+        {'B', 'C', 'A'}
+    ])
+    assert parsed_formula.truth(t1) is False
+
+
 def test_parser():
     parser = LTLfGParser()
     a, b, c = [LTLfgAtomic(FunctionSymbol(c)) for c in "ABC"]
-    print(type(parser("!A | B <-> !(A & !B) <-> A->B")))
-    print(type(LTLfEquivalence([
-        LTLfOr([LTLfNot(a), b]),
-        LTLfNot(LTLfAnd([a, LTLfNot(b)])),
-        LTLfImplies([a, b])
-    ])))
     assert parser("!A | B <-> !(A & !B) <-> A->B") == LTLfEquivalence([
         LTLfOr([LTLfNot(a), b]),
         LTLfNot(LTLfAnd([a, LTLfNot(b)])),
