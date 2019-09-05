@@ -46,7 +46,8 @@ class LDLfFormula(Formula, FiniteTraceTruth, NNF, Delta):
 
     @abstractmethod
     def _delta(self, i: PLInterpretation, epsilon=False):
-        """apply delta function, assuming that 'self' is a LDLf formula in Negative Normal Form"""
+        """apply delta function, assuming that 'self'
+        is a LDLf formula in Negative Normal Form"""
         raise NotImplementedError
 
     def __repr__(self):
@@ -71,11 +72,11 @@ class LDLfCommBinaryOperator(CommutativeBinaryOperator, LDLfFormula):
 
 class DeltaRegExp(ABC):
     @abstractmethod
-    def deltaDiamond(self, f:LDLfFormula, i: PLInterpretation, epsilon=False):
+    def deltaDiamond(self, f: LDLfFormula, i: PLInterpretation, epsilon=False):
         raise NotImplementedError
 
     @abstractmethod
-    def deltaBox(self, f:LDLfFormula, i: PLInterpretation, epsilon=False):
+    def deltaBox(self, f: LDLfFormula, i: PLInterpretation, epsilon=False):
         raise NotImplementedError
 
 
@@ -101,7 +102,8 @@ class LDLfTemporalFormula(LDLfFormula):
         return (self.temporal_brackets, self.r, self.f)
 
     def __str__(self):
-        return self.temporal_brackets[0] + str(self.r) + self.temporal_brackets[1] + "(" + str(self.f) + ")"
+        return self.temporal_brackets[0] + str(self.r) + \
+            self.temporal_brackets[1] + "(" + str(self.f) + ")"
 
     def find_labels(self):
         return self.f.find_labels().union(self.r.find_labels())

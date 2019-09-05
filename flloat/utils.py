@@ -11,11 +11,12 @@ from flloat.base.Symbols import Symbols
 
 
 def powerset(iterable) -> FrozenSet:
-    "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
+    """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"""
     combs = _powerset(iterable)
     res = frozenset(frozenset(x) for x in combs)
     # res = map(frozenset, combs)
     return res
+
 
 def _powerset(iterable):
     s = list(set(iterable))
@@ -23,14 +24,15 @@ def _powerset(iterable):
     for c in combs:
         yield c
 
-def sym2regexp(sym:Symbols):
+
+def sym2regexp(sym: Symbols):
     s = sym.value
     if s in r"|()+?*.[]":
         return r"\%s"%s
     else:
         return s
 
-MAX_CACHE_SIZE = 1024
+MAX_CACHE_SIZE = 2048
 
 
 class ObjFactory(object):
@@ -44,13 +46,14 @@ class ObjFactory(object):
             return old
         else:
             new = self.cls(*args, **kwargs)
-            # notice: we do not save kwargs, so it works only with positional arguments.
+            # notice: we do not save kwargs,
+            # so it works only with positional arguments.
             self.objects[args] = new
             return new
 
 
 class ObjConstructor(object):
-    def __init__(self, obj_factory:ObjFactory):
+    def __init__(self, obj_factory: ObjFactory):
         self.obj_factory = obj_factory
 
     def __call__(self, *args, **kwargs):

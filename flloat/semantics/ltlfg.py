@@ -20,19 +20,6 @@ class _PLGInterpretation(Interpretation):
 
     def __contains__(self, item: FunctionSymbol):
         try:
-            # print('inter', item, self.true_propositions, type(item))
-            # print(dir(item))
-            # print('Inter', item.state, item.operator, self.true_propositions)
-            # return eval(
-            #    item.state + ' ' + item.operator +
-            #    ' ' + self.true_propositions)
-
-            # if item.operator in {Operators.IN.value, Operators.NOT_IN.value}:
-            #    eval_str = item.state + ' ' + item.operator + \
-            #        ' ' + self.true_propositions.__str__()
-            #    print('contains', eval_str)
-            #    result = eval(eval_str)
-            #    return result
             if item.operator == Operators.IN.value:
                 return item.state in self.true_propositions
             elif item.operator == Operators.NOT_IN.value:
@@ -48,7 +35,6 @@ class _PLGInterpretation(Interpretation):
                 return False
         except AttributeError:
             return item in self.true_propositions
-        # return item in self.true_propositions
 
     def __iter__(self):
         return self.true_propositions.__iter__()
@@ -131,7 +117,11 @@ class FiniteTrace(Interpretation):
 
     def __str__(self):
         return "Trace (length=%s)" % self.length() + "\n\t" + \
-               "\n\t".join("%d: {"%i + ", ".join(map(str, sorted(e))) + "}" for i, e in enumerate(self.trace))
+               "\n\t".join(
+                   "%d: {" % i + ", ".join(
+                       map(
+                           str, sorted(
+                               e))) + "}" for i, e in enumerate(self.trace))
 
 
 class FiniteTraceTruth(Truth):

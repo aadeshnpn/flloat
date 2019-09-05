@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from functools import lru_cache
 
-from flloat.base.Formula import UnaryOperator, CommutativeBinaryOperator, AtomicFormula, BinaryOperator
+from flloat.base.Formula import (
+    UnaryOperator, CommutativeBinaryOperator,
+    AtomicFormula, BinaryOperator, AtomicGFormula)
 from flloat.utils import MAX_CACHE_SIZE
 
 
@@ -29,10 +31,16 @@ class DualNNF(NNF):
     def Dual(self, x):
         self.Dual = x
 
+
 class NotNNF(UnaryOperator, NNF):
     def _to_nnf(self):
-        if not isinstance(self.f, AtomicFormula):
+        if (
+            not isinstance(
+                self.f, AtomicGFormula) and not isinstance(
+                    self.f, AtomicFormula)):
             return self.f.negate().to_nnf()
+            # if not isinstance(self.f, AtomicFormula):
+            #    return self.f.negate().to_nnf()
         else:
             return self.f.negate()
 
@@ -55,6 +63,7 @@ class DualUnaryOperatorNNF(UnaryOperator, DualNNF):
     def negate(self):
         return self.Dual(self.Not(self.f))
 
+
 class DualBinaryOperatorNNF(BinaryOperator, DualNNF):
 
     def _to_nnf(self):
@@ -66,7 +75,8 @@ class DualBinaryOperatorNNF(BinaryOperator, DualNNF):
         return self.Dual(childs).simplify()
 
 
-class DualCommutativeOperatorNNF(CommutativeBinaryOperator, DualBinaryOperatorNNF):
+class DualCommutativeOperatorNNF(
+        CommutativeBinaryOperator, DualBinaryOperatorNNF):
     pass
     # def _to_nnf(self):
     #     childs = [child.to_nnf() for child in self.members]

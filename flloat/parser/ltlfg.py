@@ -37,8 +37,6 @@ class LTLfGLexer(Lexer):
         'EQUIVALENCE',
         'LPAREN',
         'RPAREN',
-        # 'LSPAREN',
-        # 'RSPAREN',
     ) + tuple(reserved.values())
 
     # Regular expression rules for simple tokens
@@ -49,8 +47,6 @@ class LTLfGLexer(Lexer):
     t_EQUIVALENCE       = sym2regexp(Symbols.EQUIVALENCE)
     t_LPAREN            = sym2regexp(Symbols.ROUND_BRACKET_LEFT)
     t_RPAREN            = sym2regexp(Symbols.ROUND_BRACKET_RIGHT)
-    # t_LSPAREN            = sym2regexp(Symbols.ALWAYS_BRACKET_LEFT)
-    # t_RSPAREN            = sym2regexp(Symbols.ALWAYS_BRACKET_RIGHT)
     t_NEXT              = sym2regexp(Symbols.NEXT)
     t_UNTIL             = sym2regexp(Symbols.UNTIL)
     t_EVENTUALLY        = sym2regexp(Symbols.EVENTUALLY)
@@ -58,6 +54,7 @@ class LTLfGLexer(Lexer):
     t_RELEASE           = sym2regexp(Symbols.RELEASE)
 
     def t_ATOM(self, t):
+        #r'[a-zA-Z_][a-zA-Z_0-9]*'
         r'[A-Za-z_][\[\]a-zA-Z_0-9,=<>!]*'
         t.type = LTLfGLexer.reserved.get(t.value, 'ATOM')  # Check for reserved words
         return t

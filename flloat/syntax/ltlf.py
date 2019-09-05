@@ -237,14 +237,14 @@ class LTLfUntil(DualBinaryOperatorNNF, LTLfTemporalFormula):
 
     def truth(self, i: FiniteTrace, pos: int=0):
         f1 = self.formulas[0]
-        f2 = LTLfUntil(self.formulas[1:]) if len(self.formulas)>2 else self.formulas[1]
+        f2 = LTLfUntil(self.formulas[1:]) if len(self.formulas) > 2 else self.formulas[1]
 
         a = any(f2.truth(i, j) for j in range(pos, i.last()+1))
         b = all(f1.truth(i, k) for j in range(pos, i.last()+1) for k in range(pos, j))
 
         return any(f2.truth(i, j) and all(f1.truth(i, k) for k in range(pos, j)) for j in range(pos, i.last()+1))
 
-    def _delta(self, i:PLInterpretation, epsilon=False):
+    def _delta(self, i: PLInterpretation, epsilon=False):
         if epsilon:
             return PLFalse()
         f1 = self.formulas[0]
@@ -306,7 +306,7 @@ class LTLfRelease(DualBinaryOperatorNNF, BaseConvertibleFormula, LTLfTemporalFor
     def _convert(self):
         return LTLfNot(LTLfUntil([LTLfNot(f) for f in self.formulas]))
 
-    def _delta(self, i:PLInterpretation, epsilon=False):
+    def _delta(self, i: PLInterpretation, epsilon=False):
         if epsilon:
             return PLTrue()
         f1 = self.formulas[0]

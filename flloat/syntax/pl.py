@@ -142,12 +142,6 @@ class PLGAtomic(AtomicGFormula, PLFormula):
         # print('Interpretations', i)
         # print('symbol', self.s)
         try:
-            # if self.s.operator in {Operators.IN.value, Operators.NOT_IN.value}:
-            #    eval_str = self.s.state + ' ' + self.s.operator + \
-            #        ' ' + i.__str__()
-            #    print('truth', eval_str)
-            #    result = eval(eval_str)
-            #    return result
             if self.s.operator == Operators.IN.value:
                 return self.s.state in i
             elif self.s.operator == Operators.NOT_IN.value:
@@ -162,8 +156,6 @@ class PLGAtomic(AtomicGFormula, PLFormula):
                         return True
                 return False
 
-            # return eval(
-            #    self.s.state + ' ' + self.s.operator + ' ' + i)
         except AttributeError:
             return self.s in i
 
