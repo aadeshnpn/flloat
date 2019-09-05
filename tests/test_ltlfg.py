@@ -5,13 +5,17 @@ from flloat.parser.ltlf import LTLfParser
 
 from flloat.semantics.ltlfg import FiniteTrace
 
-from flloat.semantics.ltlfg import PLGInterpretation, PLGTrueInterpretation
+from flloat.semantics.ltlfg import (
+    PLGInterpretation, PLGTrueInterpretation, PLGFalseInterpretation
+)
 
 from flloat.syntax.ltlfg import (
     LTLfgAtomic, LTLfAnd, LTLfEquivalence, LTLfOr, LTLfNot, LTLfImplies,
     LTLfEventually, LTLfAlways, LTLfUntil, LTLfRelease, LTLfNext,
     LTLfWeakNext, LTLfTrue, LTLfFalse
 )
+
+from flloat.syntax.pl import PLGAtomic, PLTrue, PLFalse, PLAnd, PLOr
 
 
 def test_parser():
@@ -140,3 +144,94 @@ def test_nnf():
     assert f.to_nnf() == LTLfRelease([LTLfNot(a), LTLfNot(b)])
     f = parser("!(A R B)")
     assert f.to_nnf() == LTLfUntil([LTLfNot(a), LTLfNot(b)])
+
+
+def test_delta():
+    parser = LTLfGParser()
+    sa, sb = FunctionSymbol("A"), FunctionSymbol("B")
+    a, b = PLGAtomic(sa), PLGAtomic(sb)
+
+    i_ = PLGFalseInterpretation()
+    i_a = PLGInterpretation({sa})
+    i_b = PLGInterpretation({sb})
+    i_ab = PLGInterpretation({sa, sb})
+
+    true = PLTrue()
+    false = PLFalse()
+
+    assert parser("A").delta(i_) == false
+    assert parser("A").delta(i_a) == true
+    assert parser("A").delta(i_b) == false
+    assert parser("A").delta(i_ab) == true
+
+    assert parser("!A").delta(i_) == true
+    assert parser("!A").delta(i_a) == false
+    assert parser("!A").delta(i_b) == true
+    assert parser("!A").delta(i_ab) == false
+
+    assert parser("A & B").delta(i_) == PLAnd([false, false])
+    assert parser("A & B").delta(i_a) == PLAnd([true, false])
+    assert parser("A & B").delta(i_b) == PLAnd([false, true])
+    assert parser("A & B").delta(i_ab) == PLAnd([true, true])
+
+    assert parser("A | B").delta(i_) == PLOr([false, false])
+    assert parser("A | B").delta(i_a) == PLOr([true, false])
+    assert parser("A | B").delta(i_b) == PLOr([false, true])
+    assert parser("A | B").delta(i_ab) == PLOr([true, true])
+
+    assert parser("X A").delta(
+        i_) == PLAnd([LTLfgAtomic(sa), LTLfEventually(LTLfTrue()).to_nnf()])
+    assert parser(
+        "X A").delta(i_a) == PLAnd(
+            [LTLfgAtomic(sa), LTLfEventually(LTLfTrue()).to_nnf()])
+    assert parser(
+        "X A").delta(i_b) == PLAnd(
+            [LTLfgAtomic(sa), LTLfEventually(LTLfTrue()).to_nnf()])
+    assert parser(
+        "X A").delta(i_ab) == PLAnd(
+            [LTLfgAtomic(sa), LTLfEventually(LTLfTrue()).to_nnf()])
+    assert parser("X A").delta(i_, epsilon=True) == false
+    assert parser(
+        "F A").delta(i_a) == PLOr([true,  PLAnd(
+            [LTLfEventually(
+                LTLfTrue()).to_nnf(), true, LTLfUntil(
+                    [LTLfTrue(), LTLfgAtomic(sa)])])])
+    assert parser(
+        "F A").delta(i_) == PLOr(
+            [false, PLAnd([LTLfEventually(
+                LTLfTrue()).to_nnf(), true, LTLfUntil(
+                    [LTLfTrue(), LTLfgAtomic(sa)])])])
+    assert parser("F A").delta(i_a, epsilon=True) == false
+    assert parser("F A").delta(i_, epsilon=True) == false
+
+    assert parser(
+        "G A").delta(i_a) == PLAnd(
+            [true, PLOr(
+                [false, LTLfAlways(
+                    LTLfFalse()).to_nnf(), LTLfRelease(
+                        [LTLfFalse(), LTLfgAtomic(sa)])])])
+    assert parser(
+        "G A").delta(i_a) == PLAnd(
+            [true, PLOr([false, LTLfAlways(
+                LTLfFalse()).to_nnf(), LTLfRelease(
+                    [LTLfFalse(), LTLfgAtomic(sa)])])])
+    assert parser("G A").delta(i_a, epsilon=True) == true
+    assert parser("G A").delta(i_,  epsilon=True) == true
+
+    assert parser("A U B").delta(i_a) == PLOr([
+        false,
+        PLAnd([
+            true,
+            LTLfUntil([LTLfgAtomic(sa), LTLfgAtomic(sb)]),
+            LTLfEventually(LTLfTrue()).to_nnf()
+        ])
+    ])
+
+    assert parser("A R B").delta(i_a) == PLAnd([
+        false,
+        PLOr([
+            true,
+            LTLfRelease([LTLfgAtomic(sa), LTLfgAtomic(sb)]),
+            LTLfAlways(LTLfFalse()).to_nnf()
+        ])
+    ])
