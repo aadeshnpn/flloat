@@ -17,7 +17,7 @@ from flloat.base.nnf import (
     )
 from flloat.base.truths import Truth, NotTruth, OrTruth, AndTruth
 from flloat.utils import MAX_CACHE_SIZE
-from flloat.flloat import DFAOTF, to_automaton, to_automaton_
+# from flloat.flloat import DFAOTF, to_automaton, to_automaton_
 from flloat.semantics.ldlf import FiniteTrace, FiniteTraceTruth
 from flloat.semantics.pl import PLInterpretation, PLFalseInterpretation
 from flloat.syntax.ldlf import (
@@ -63,17 +63,17 @@ class LTLfFormula(Formula, LTLfTruth, NNF, Delta):
     def __repr__(self):
         return self.__str__()
 
-    def to_automaton(
-        self, labels: Set[Symbol]=None, on_the_fly=False,
-            determinize=False, minimize=True):
-        if labels is None:
-            labels = self.find_labels()
-        if on_the_fly:
-            return DFAOTF(self)
-        elif determinize:
-            return to_automaton(self, labels, minimize)
-        else:
-            return to_automaton_(self, labels)
+    # def to_automaton(
+    #     self, labels: Set[Symbol]=None, on_the_fly=False,
+    #         determinize=False, minimize=True):
+    #     if labels is None:
+    #         labels = self.find_labels()
+    #     if on_the_fly:
+    #         return DFAOTF(self)
+    #     elif determinize:
+    #         return to_automaton(self, labels, minimize)
+    #     else:
+    #         return to_automaton_(self, labels)
 
 
 class LTLfCommBinaryOperator(CommutativeBinaryOperator, LTLfFormula):

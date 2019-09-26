@@ -16,7 +16,7 @@ from flloat.base.misc import Delta
 from flloat.base.nnf import NNF, NotNNF, DualBinaryOperatorNNF, DualNNF
 from flloat.base.truths import NotTruth, AndTruth, OrTruth, Truth
 from flloat.utils import MAX_CACHE_SIZE
-from flloat.flloat import to_automaton, DFAOTF, to_automaton_
+# from flloat.flloat import to_automaton, DFAOTF, to_automaton_
 from flloat.semantics.ldlf import FiniteTrace, FiniteTraceTruth
 from flloat.semantics.pl import PLInterpretation, PLFalseInterpretation
 from flloat.syntax.pl import PLFormula, PLTrue, PLFalse, PLAnd, PLOr
@@ -53,17 +53,17 @@ class LDLfFormula(Formula, FiniteTraceTruth, NNF, Delta):
     def __repr__(self):
         return self.__str__()
 
-    def to_automaton(
-            self, labels: Set[Symbol]=None, on_the_fly=False,
-            determinize=False, minimize=True):
-        if labels is None:
-            labels = self.find_labels()
-        if on_the_fly:
-            return DFAOTF(self)
-        elif determinize:
-            return to_automaton(self, labels, minimize)
-        else:
-            return to_automaton_(self, labels)
+    # def to_automaton(
+    #         self, labels: Set[Symbol]=None, on_the_fly=False,
+    #         determinize=False, minimize=True):
+    #     if labels is None:
+    #         labels = self.find_labels()
+    #     if on_the_fly:
+    #         return DFAOTF(self)
+    #     elif determinize:
+    #         return to_automaton(self, labels, minimize)
+    #     else:
+    #         return to_automaton_(self, labels)
 
 
 class LDLfCommBinaryOperator(CommutativeBinaryOperator, LDLfFormula):

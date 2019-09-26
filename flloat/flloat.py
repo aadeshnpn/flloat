@@ -1,11 +1,11 @@
 from typing import Set, List
 
-from pythomata.base.Alphabet import Alphabet as PythomataAlphabet
+from pythomata.base import Alphabet as PythomataAlphabet
 
-from pythomata.base.DFA import DFA
-from pythomata.base.NFA import NFA
-from pythomata.base.Simulator import Simulator
-from pythomata.base.utils import MacroState
+from pythomata.base import DFA
+from pythomata.base import NFA
+from pythomata.base import Simulator
+from pythomata.base import MacroState
 
 from flloat.base.Alphabet import Alphabet
 from flloat.base.Formula import Formula
