@@ -1,9 +1,9 @@
 from flloat.base.Symbol import Symbol, FunctionSymbol
 from flloat.base.Symbols import Symbols, Operators
 from flloat.parser.ltlfg import LTLfGParser
-from flloat.parser.ltlf import LTLfParser
+# from flloat.parser.ltlf import LTLfParser
 
-from flloat.semantics.ltlfg import FiniteTrace
+from flloat.semantics.ltlfg import FiniteTrace, FiniteTraceDict
 
 from flloat.semantics.ltlfg import (
     PLGInterpretation, PLGTrueInterpretation, PLGFalseInterpretation
@@ -20,29 +20,31 @@ from flloat.syntax.pl import PLGAtomic, PLTrue, PLFalse, PLAnd, PLOr
 
 def test_ltlfg_mdp():
     parser = LTLfGParser()
-    formula = "S11 R S88"
+    formula = "P_s[S11,in] R P_s[S88,in]"
     parsed_formula = parser(formula)
     a = LTLfgAtomic(FunctionSymbol('S11'))
     b = LTLfgAtomic(FunctionSymbol('S88'))
     # S and E are action. S11.. are states. The MDP world is 8x8
-    t1 = FiniteTrace.fromStringSets([
-        {'S11', 'S', 'S21', 'E', 'S22', 'E', 'S23', 'E', 'S24',
+    # t1 = FiniteTrace.fromStringSets(
+    t1 = FiniteTraceDict.fromDictSets(
+        {'s': [{'S11', 'S', 'S21', 'E', 'S22', 'E', 'S23', 'E', 'S24',
         'E', 'S25', 'E', 'S26', 'E', 'S27', 'S', 'S37',
         'S', 'S47', 'S', 'S57', 'S', 'S67', 'E', 'S68',
-        'S', 'S78', 'S', 'S88'}
-    ])
+        'S', 'S78', 'S', 'S88'}] }
+    )
     assert parsed_formula == LTLfRelease([a, b])
     assert parsed_formula.truth(t1) is True
 
 
 def test_ltlfg_mdp_trace():
     parser = LTLfGParser()
-    formula = "S11 R S88"
+    formula = "P_s[S11,in] R P_s[S88,in]"
     parsed_formula = parser(formula)
     a = LTLfgAtomic(FunctionSymbol('S11'))
     b = LTLfgAtomic(FunctionSymbol('S88'))
     # S and E are action. S11.. are states. The MDP world is 8x8
-    t1 = FiniteTrace.fromStringSets([
+    t1 = FiniteTraceDict.fromDictSets({
+        's': [
         {'S11'},
         {'S11', 'S'},
         {'S11', 'S', 'E'},
@@ -121,29 +123,29 @@ def test_ltlfg_mdp_trace():
          'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27',
          'S', 'S37', 'S', 'S47', 'S', 'S57', 'S', 'S67', 'E', 'S68', 'S',
          'S78', 'S', 'S88'}
-    ])
+    ]})
     assert parsed_formula == LTLfRelease([a, b])
     assert parsed_formula.truth(t1) is False
 
 
 def test_ltlfg_velocity():
     parser = LTLfGParser()
-    formula = "Pv[19,<] R Pv[55,>]"
+    formula = "P_v[19,<] R P_v[55,>]"
     parsed_formula = parser(formula)
-    t1 = FiniteTrace.fromStringSets([
+    t1 = FiniteTraceDict.fromDictSets({'v':[
         {'20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30',
          '31', '32', '33', '34', '35', '36', '37', '50', '51', '52', '53'}
-    ])
+    ]})
     assert parsed_formula.truth(t1) is True
 
 
 def test_ltlfg_set():
     parser = LTLfGParser()
-    formula = "Ps[A,not_in] R Ps[B,not_in]"
+    formula = "P_s[A,not_in] R P_s[B,not_in]"
     parsed_formula = parser(formula)
-    t1 = FiniteTrace.fromStringSets([
+    t1 = FiniteTraceDict.fromDictSets({'s':[
         {'B', 'C', 'A'}
-    ])
+    ]})
     assert parsed_formula.truth(t1) is False
 
 
@@ -174,59 +176,59 @@ def test_parser():
 
 def test_truth():
     parser = LTLfGParser()
-    t = FiniteTrace.fromStringSets([
+    t = FiniteTraceDict.fromDictSets({'s':[
         {"A"},
         {"A"},
         {"B"},
         {"B"},
         {"C"},
-        {"C"},
-    ])
+        {"C"}
+    ]})
 
     # Next and Weak Next
-    f = "X A"
-    assert parser("X A").truth(t, 0)
-    assert not parser("X A").truth(t, 1)
-    assert not parser("WX A").truth(t, 1)
-    assert parser("X B").truth(t, 1)
-    assert parser("X C").truth(t, 4)
+    f = "X P_s[A,in]"
+    assert parser("X P_s[A,in]").truth(t, 0)
+    assert not parser("X P_s[A,in]").truth(t, 1)
+    assert not parser("WX P_s[A,in]").truth(t, 1)
+    assert parser("X P_s[B,in]").truth(t, 1)
+    assert parser("X P_s[C,in]").truth(t, 4)
     # at the last step, Next != WeakNext
-    assert not parser("X C").truth(t, 5)
-    assert parser("WX C").truth(t, 5)
+    assert not parser("X P_s[C,in]").truth(t, 5)
+    assert parser("WX P_s[C,in]").truth(t, 5)
 
     # Until
-    f = "A U B U C"
+    f = "P_s[A,in] U P_s[B,in] U P_s[C,in]"
     assert parser(f).truth(t, 0)
     assert parser(f).truth(t, 2)
     assert parser(f).truth(t, 4)
     assert not parser(f).truth(t, 10)
 
-    assert not parser("A U C").truth(t, 0)
-    assert not parser("C U B").truth(t, 0)
+    assert not parser("P_s[A,in] U P_s[C,in]").truth(t, 0)
+    assert not parser("P_s[C,in] U P_s[B,in]").truth(t, 0)
 
     # Release - dual of Until
-    f = "(!A R !B R !C)"
+    f = "(P_s[A,not_in] R P_s[B,not_in] R P_s[C,not_in])"
     assert not parser(f).truth(t, 0)
     assert not parser(f).truth(t, 2)
     assert not parser(f).truth(t, 4)
     assert parser(f).truth(t, 10)
 
-    assert not parser("A U C").truth(t, 0)
-    assert not parser("C U B").truth(t, 0)
+    assert not parser("P_s[A,in] U P_s[C,in]").truth(t, 0)
+    assert not parser("P_s[A,in] U P_s[C,in]").truth(t, 0)
 
     # Eventually
-    assert parser("F C & !A & !B").truth(t, 0)
-    assert not parser("F A & B & C").truth(t, 0)
-    assert parser("F G C").truth(t, 0)
-    assert not parser("F G B").truth(t, 0)
+    assert parser("F (P_s[C,in] & P_s[A,not_in] & P_s[B,not_in])").truth(t, 0)
+    assert not parser("F P_s[A,in] & P_s[B,in] & P_s[C,in]").truth(t, 0)
+    assert parser("F G P_s[C,in]").truth(t, 0)
+    assert not parser("F G P_s[B,in]").truth(t, 0)
 
     # Always
-    assert parser("G A | B | C").truth(t, 0)
-    assert parser("G F (C & !A & !B)").truth(t, 0)
-    assert not parser("G C").truth(t, 0)
-    assert parser("G C").truth(t, 4)
-    assert parser("G C").truth(t, 10)
-    assert parser("G F C").truth(t, 0)
+    assert parser("G P_s[A,in] | P_s[B,in] | P_s[C,in]").truth(t, 0)
+    assert parser("G F (P_s[C,in] & P_s[A,not_in] & P_s[B,not_in])").truth(t, 0)
+    assert not parser("G P_s[C,in]").truth(t, 0)
+    assert parser("G P_s[C,in]").truth(t, 4)
+    assert parser("G P_s[C,in]").truth(t, 10)
+    assert parser("G F P_s[C,in]").truth(t, 0)
 
 
 def test_nnf():

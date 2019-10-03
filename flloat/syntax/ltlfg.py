@@ -22,11 +22,14 @@ from flloat.utils import MAX_CACHE_SIZE
 
 from flloat.semantics.ltlfg import FiniteTrace, FiniteTraceTruth
 from flloat.semantics.ltlfg import PLGInterpretation, PLGFalseInterpretation
+
 from flloat.syntax.ldlf import (
-    Delta, LDLfAtomic, LDLfNot, LDLfAnd, LDLfOr, LDLfEquivalence, LDLfDiamond,
+    Delta,
+    LDLfAtomic, LDLfNot, LDLfAnd, LDLfOr, LDLfEquivalence, LDLfDiamond,
     RegExpPropositional, RegExpStar, RegExpSequence, RegExpTest,
     LDLfPropositional, LDLfBox, LDLfEnd
     )
+
 from flloat.syntax.pl import PLTrue, PLFalse, PLAnd, PLOr, PLAtomic, PLGAtomic
 
 
@@ -110,7 +113,6 @@ class LTLfgAtomic(AtomicGFormula, LTLfgFormula):
         return PLTrue() if self.a.truth(i) else PLFalse()
 
     def truth(self, i: FiniteTrace, pos: int=0):
-        # i = FiniteTrace([i[self.s.key]])
         return self.a.truth(i.get(pos))
 
     def find_labels(self):
@@ -122,7 +124,7 @@ class LTLfgAtomic(AtomicGFormula, LTLfgFormula):
 
 class LTLfTrue(LTLfgAtomic):
     def __init__(self):
-        super().__init__(Symbol(Symbols.TRUE.value))
+        super().__init__(FunctionSymbol(Symbols.TRUE.value))
         self.a = PLTrue()
 
     def negate(self):
@@ -131,7 +133,7 @@ class LTLfTrue(LTLfgAtomic):
 
 class LTLfFalse(LTLfgAtomic):
     def __init__(self):
-        super().__init__(Symbol(Symbols.FALSE.value))
+        super().__init__(FunctionSymbol(Symbols.FALSE.value))
         self.a = PLFalse()
 
     def negate(self):
@@ -193,7 +195,8 @@ class LTLfNext(DualUnaryOperatorNNF, LTLfTemporalFormula):
     Not = LTLfNot
 
     def truth(self, i: FiniteTrace, pos: int=0):
-        i = FiniteTrace([i[self.f.s.key]])
+        if type(i).__name__ == 'dict':
+            i = FiniteTrace.fromStringSets(i[self.f.s.key])
         return pos < i.last() and self.f.truth(i, pos + 1)
 
     def _delta(self, i: PLGInterpretation, epsilon=False):
@@ -217,7 +220,8 @@ class LTLfWeakNext(
         return LTLfNot(LTLfNext(LTLfNot(self.f)))
 
     def truth(self, i: FiniteTrace, pos: int=0):
-        i = FiniteTrace([i[self.f.s.key]])
+        if type(i).__name__ == 'dict':
+            i = FiniteTrace.fromStringSets(i[self.f.s.key])
         return self._convert().truth(i, pos)
 
     def _delta(self, i: PLGInterpretation, epsilon=False):
@@ -248,22 +252,39 @@ class LTLfUntil(DualBinaryOperatorNNF, LTLfTemporalFormula):
         f1 = self.formulas[0]
         f2 = LTLfUntil(
             self.formulas[1:]) if len(self.formulas) > 2 else self.formulas[1]
-        # print(type(f2).__name__)
-        # print(LTLfgAtomic.__name__)
-        if type(f2).__name__ != LTLfgAtomic.__name__:
-            i = FiniteTrace([i[f2.f.s.key]])
-        else:
-            i = FiniteTrace([i[f2.s.key]])
+        # print(self.formulas)
+        if type(i).__name__ == 'dict':
+            #, 'LTLfTrue', 'LTLfFalse'):
+            if type(f1).__name__ == LTLfgAtomic.__name__:
+                i1 = FiniteTrace.fromStringSets(i[f1.s.key])
+            elif type(f1).__name__ in ('LTLfTrue', 'LTLfFalse'):
+                i1 = FiniteTrace.fromStringSets(i[list(i.keys())[0]])
+            else:
+                i1 = FiniteTrace.fromStringSets(i[f1.f.s.key])
 
-        a = any(f2.truth(i, j) for j in range(pos, i.last()+1))
-        b = all(
-            f1.truth(i, k) for j in range(
-                pos, i.last()+1) for k in range(pos, j))
+            if type(f2).__name__ == LTLfUntil.__name__:
+                i2 = i
+            else:
+                if type(f2).__name__ == LTLfgAtomic.__name__:
+                    i2 = FiniteTrace.fromStringSets(i[f2.s.key])
+                elif type(f2).__name__ in ('LTLfTrue', 'LTLfFalse'):
+                    i2 = FiniteTrace.fromStringSets(i[list(i.keys())[0]])
+                    # pass
+                else:
+                    print(f2.f, type(f2.f))
+                    i2 = FiniteTrace.fromStringSets(i[f2.f.s.key])
+        else:
+            i1, i2 = i, i
+        # b = all(
+        #    f1.truth(i1, k) for j in range(
+        #        pos, i1.last()+1) for k in range(pos, j))
+
+        # a = any(f2.truth(i2, j) for j in range(pos, i1.last()+1))
 
         return any(
-            f2.truth(i, j) and all(
-                f1.truth(i, k) for k in range(
-                    pos, j)) for j in range(pos, i.last()+1))
+            f2.truth(i2, j) and all(
+                f1.truth(i1, k) for k in range(
+                    pos, j)) for j in range(pos, i1.last()+1))
 
     def _delta(self, i: PLGInterpretation, epsilon=False):
         if epsilon:

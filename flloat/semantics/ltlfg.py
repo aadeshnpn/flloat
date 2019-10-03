@@ -156,15 +156,18 @@ class FiniteTraceDict(Interpretation, dict):
         #
         # print ([{Symbol(string) for string in i[1]} for i in d.items()])
         # d1 = dict([])
-        for items in d.items():
-            for i in range(len(items[1])):
-                d[items[0]][i] = Symbol(d[items[0]][i])
-            #d[items[0]] = set(d[items[0]])
-            d[items[0]] = PLGInterpretation(frozenset(d[items[0]]))
+
+        # for items in d.items():
+        #     for i in range(len(items[1])):
+        #         d[items[0]][i] = Symbol(d[items[0]][i])
+        #     #d[items[0]] = set(d[items[0]])
+        #     d[items[0]] = PLGInterpretation(frozenset(d[items[0]]))
+
         # return FiniteTrace(
         #    [PLGInterpretation(frozenset(d))]
         #)
         return d
+
         #return FiniteTraceDict([d])
 
 
