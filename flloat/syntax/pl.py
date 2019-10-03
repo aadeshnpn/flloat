@@ -139,8 +139,6 @@ class PLGAtomic(AtomicGFormula, PLFormula):
 
     def truth(self, i: PLGInterpretation, *args):
         # return self.s in i
-        # print('Interpretations', i)
-        # print('symbol', self.s)
         try:
             if self.s.operator == Operators.IN.value:
                 return self.s.state in i

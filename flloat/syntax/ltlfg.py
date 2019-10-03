@@ -110,6 +110,7 @@ class LTLfgAtomic(AtomicGFormula, LTLfgFormula):
         return PLTrue() if self.a.truth(i) else PLFalse()
 
     def truth(self, i: FiniteTrace, pos: int=0):
+        # i = FiniteTrace([i[self.s.key]])
         return self.a.truth(i.get(pos))
 
     def find_labels(self):
@@ -192,6 +193,7 @@ class LTLfNext(DualUnaryOperatorNNF, LTLfTemporalFormula):
     Not = LTLfNot
 
     def truth(self, i: FiniteTrace, pos: int=0):
+        i = FiniteTrace([i[self.f.s.key]])
         return pos < i.last() and self.f.truth(i, pos + 1)
 
     def _delta(self, i: PLGInterpretation, epsilon=False):
@@ -215,6 +217,7 @@ class LTLfWeakNext(
         return LTLfNot(LTLfNext(LTLfNot(self.f)))
 
     def truth(self, i: FiniteTrace, pos: int=0):
+        i = FiniteTrace([i[self.f.s.key]])
         return self._convert().truth(i, pos)
 
     def _delta(self, i: PLGInterpretation, epsilon=False):
@@ -246,6 +249,7 @@ class LTLfUntil(DualBinaryOperatorNNF, LTLfTemporalFormula):
         f2 = LTLfUntil(
             self.formulas[1:]) if len(self.formulas) > 2 else self.formulas[1]
 
+        i = FiniteTrace([i[f2.f.s.key]])
         a = any(f2.truth(i, j) for j in range(pos, i.last()+1))
         b = all(
             f1.truth(i, k) for j in range(

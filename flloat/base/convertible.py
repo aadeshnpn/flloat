@@ -17,6 +17,9 @@ class ConvertibleFormula(Formula):
 
 class BaseConvertibleFormula(ConvertibleFormula, Truth, NNF):
     def truth(self, *args):
+        # print (*args)
+        # print (self.f, dir(self.f), type(self.f))
+        # print (self.f.s, dir(self.f.s), type(self.f.s))
         return self._convert().truth(*args)
 
     def _to_nnf(self):

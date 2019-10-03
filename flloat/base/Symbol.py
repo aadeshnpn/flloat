@@ -25,8 +25,11 @@ class FunctionSymbol(Symbol):
             pass
 
     def _parse(self):
-        temp = re.match('[A-Za-z0-9]*', self.name)
-        self.fname = temp.group()
+        temp = re.match('[A-Za-z0-9_]*', self.name)
+        fname = temp.group()
+        fnames = fname.split('_')
+        self.fname = fnames[0]
+        self.key = '_'.join(fnames[1:])
         args = re.search('\[[a-zA-Z0-9,_<>=!]*\]', self.name)
         args = args.group()
         arg1, arg2 = args.split(',')

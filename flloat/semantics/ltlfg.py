@@ -128,3 +128,69 @@ class FiniteTraceTruth(Truth):
     @abstractmethod
     def truth(self, i: FiniteTrace, pos: int):
         raise NotImplementedError
+
+
+
+class FiniteTraceDict(Interpretation, dict):
+    def __init__(self, trace: List[PLGInterpretation]):
+        super().__init__()
+        self.trace = trace
+
+    def _members(self):
+        return tuple(self.trace)
+
+    @staticmethod
+    def fromSymbolSets(l: List[Set[Symbol]]):
+        return FiniteTrace([PLGInterpretation(s) for s in l])
+
+    @staticmethod
+    def fromStringSets(l: List[Set[str]]):
+        return FiniteTrace(
+            [PLGInterpretation(frozenset(
+                {Symbol(string) for string in s})) for s in l])
+
+    @staticmethod
+    def fromDictSets(d: dict):
+        #return FiniteTrace(
+        #    [PLGInterpretation(frozenset(
+        #
+        # print ([{Symbol(string) for string in i[1]} for i in d.items()])
+        # d1 = dict([])
+        for items in d.items():
+            for i in range(len(items[1])):
+                d[items[0]][i] = Symbol(d[items[0]][i])
+            #d[items[0]] = set(d[items[0]])
+            d[items[0]] = PLGInterpretation(frozenset(d[items[0]]))
+        # return FiniteTrace(
+        #    [PLGInterpretation(frozenset(d))]
+        #)
+        return d
+        #return FiniteTraceDict([d])
+
+
+    def length(self):
+        return len(self.trace)
+
+    def last(self):
+        return len(self.trace)-1
+
+    def _position_is_legal(self, position: int):
+        return position >= 0 and position <= self.last()
+
+    def get(self, position: int) -> PLGInterpretation:
+        assert self._position_is_legal(position)
+        return self.trace[position]
+
+    def segment(self, start: int, end: int):
+        if not self._position_is_legal(
+                start) or not self._position_is_legal(end):
+            raise ValueError("Start or end position are not valid")
+        return FiniteTrace(self.trace[start: end])
+
+    def __str__(self):
+        return "Trace (length=%s)" % self.length() + "\n\t" + \
+               "\n\t".join(
+                   "%d: {" % i + ", ".join(
+                       map(
+                           str, sorted(
+                               e))) + "}" for i, e in enumerate(self.trace))
