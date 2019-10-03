@@ -248,8 +248,13 @@ class LTLfUntil(DualBinaryOperatorNNF, LTLfTemporalFormula):
         f1 = self.formulas[0]
         f2 = LTLfUntil(
             self.formulas[1:]) if len(self.formulas) > 2 else self.formulas[1]
+        # print(type(f2).__name__)
+        # print(LTLfgAtomic.__name__)
+        if type(f2).__name__ != LTLfgAtomic.__name__:
+            i = FiniteTrace([i[f2.f.s.key]])
+        else:
+            i = FiniteTrace([i[f2.s.key]])
 
-        i = FiniteTrace([i[f2.f.s.key]])
         a = any(f2.truth(i, j) for j in range(pos, i.last()+1))
         b = all(
             f1.truth(i, k) for j in range(
