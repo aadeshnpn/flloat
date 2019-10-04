@@ -271,10 +271,20 @@ class LTLfUntil(DualBinaryOperatorNNF, LTLfTemporalFormula):
                     i2 = FiniteTrace.fromStringSets(i[list(i.keys())[0]])
                     # pass
                 else:
-                    print(f2.f, type(f2.f))
-                    i2 = FiniteTrace.fromStringSets(i[f2.f.s.key])
+                    # print(f2, type(f2))
+                    try:
+                        i2 = FiniteTrace.fromStringSets(i[f2.f.s.key])
+                    except AttributeError:
+                        i2 = i1
         else:
             i1, i2 = i, i
+
+        # print('i1', i1)
+        # print('i2', i2)
+        # print('f2', f2)
+        # print([j for j in range(pos, i1.last()+1)])
+        # print( f2.truth(i1, 0))
+
         # b = all(
         #    f1.truth(i1, k) for j in range(
         #        pos, i1.last()+1) for k in range(pos, j))
