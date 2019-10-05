@@ -22,8 +22,8 @@ def test_ltlfg_mdp():
     parser = LTLfGParser()
     formula = "P_s[S11,in] R P_s[S88,in]"
     parsed_formula = parser(formula)
-    a = LTLfgAtomic(FunctionSymbol('S11'))
-    b = LTLfgAtomic(FunctionSymbol('S88'))
+    a = LTLfgAtomic(FunctionSymbol('P_s[S11,in]'))
+    b = LTLfgAtomic(FunctionSymbol('P_s[S88,in]'))
     # S and E are action. S11.. are states. The MDP world is 8x8
     # t1 = FiniteTrace.fromStringSets(
     t1 = FiniteTraceDict.fromDictSets(
@@ -40,8 +40,8 @@ def test_ltlfg_mdp_trace():
     parser = LTLfGParser()
     formula = "P_s[S11,in] R P_s[S88,in]"
     parsed_formula = parser(formula)
-    a = LTLfgAtomic(FunctionSymbol('S11'))
-    b = LTLfgAtomic(FunctionSymbol('S88'))
+    a = LTLfgAtomic(FunctionSymbol('P_s[S11,in]'))
+    b = LTLfgAtomic(FunctionSymbol('P_s[S88,in]'))
     # S and E are action. S11.. are states. The MDP world is 8x8
     t1 = FiniteTraceDict.fromDictSets({
         's': [

@@ -252,7 +252,7 @@ class LTLfUntil(DualBinaryOperatorNNF, LTLfTemporalFormula):
         f1 = self.formulas[0]
         f2 = LTLfUntil(
             self.formulas[1:]) if len(self.formulas) > 2 else self.formulas[1]
-        # print(self.formulas)
+
         if type(i).__name__ == 'dict':
             #, 'LTLfTrue', 'LTLfFalse'):
             if type(f1).__name__ == LTLfgAtomic.__name__:
@@ -269,21 +269,13 @@ class LTLfUntil(DualBinaryOperatorNNF, LTLfTemporalFormula):
                     i2 = FiniteTrace.fromStringSets(i[f2.s.key])
                 elif type(f2).__name__ in ('LTLfTrue', 'LTLfFalse'):
                     i2 = FiniteTrace.fromStringSets(i[list(i.keys())[0]])
-                    # pass
                 else:
-                    # print(f2, type(f2))
                     try:
                         i2 = FiniteTrace.fromStringSets(i[f2.f.s.key])
                     except AttributeError:
                         i2 = i1
         else:
             i1, i2 = i, i
-
-        # print('i1', i1)
-        # print('i2', i2)
-        # print('f2', f2)
-        # print([j for j in range(pos, i1.last()+1)])
-        # print( f2.truth(i1, 0))
 
         # b = all(
         #    f1.truth(i1, k) for j in range(
