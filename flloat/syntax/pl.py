@@ -146,6 +146,7 @@ class PLGAtomic(AtomicGFormula, PLFormula):
                 return self.s.state not in i
             else:
                 for val in i:
+                    print(self.s.state, self.s.operator, val)
                     result = eval(
                         self.s.state + ' ' + self.s.operator +
                         ' ' + val
@@ -155,6 +156,7 @@ class PLGAtomic(AtomicGFormula, PLFormula):
                 return False
 
         except AttributeError:
+            print(i, self.s)
             return self.s in i
 
     def _to_nnf(self):

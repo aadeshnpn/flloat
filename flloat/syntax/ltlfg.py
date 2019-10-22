@@ -252,7 +252,7 @@ class LTLfUntil(DualBinaryOperatorNNF, LTLfTemporalFormula):
         f1 = self.formulas[0]
         f2 = LTLfUntil(
             self.formulas[1:]) if len(self.formulas) > 2 else self.formulas[1]
-
+        print(f1, f2)
         if type(i).__name__ == 'dict':
             #, 'LTLfTrue', 'LTLfFalse'):
             if type(f1).__name__ == LTLfgAtomic.__name__:
@@ -261,7 +261,7 @@ class LTLfUntil(DualBinaryOperatorNNF, LTLfTemporalFormula):
                 i1 = FiniteTrace.fromStringSets(i[list(i.keys())[0]])
             else:
                 i1 = FiniteTrace.fromStringSets(i[f1.f.s.key])
-
+            print(type(f2))
             if type(f2).__name__ == LTLfUntil.__name__:
                 i2 = i
             else:
@@ -269,6 +269,9 @@ class LTLfUntil(DualBinaryOperatorNNF, LTLfTemporalFormula):
                     i2 = FiniteTrace.fromStringSets(i[f2.s.key])
                 elif type(f2).__name__ in ('LTLfTrue', 'LTLfFalse'):
                     i2 = FiniteTrace.fromStringSets(i[list(i.keys())[0]])
+                elif type(f2).__name__ in ('LTLfAnd'):
+                    print(dir(f2))
+                    i2 = i # print('ltlfand',dir(f2))
                 else:
                     try:
                         i2 = FiniteTrace.fromStringSets(i[f2.f.s.key])
@@ -282,7 +285,7 @@ class LTLfUntil(DualBinaryOperatorNNF, LTLfTemporalFormula):
         #        pos, i1.last()+1) for k in range(pos, j))
 
         # a = any(f2.truth(i2, j) for j in range(pos, i1.last()+1))
-
+        print('i1, i2',i1, i2)
         return any(
             f2.truth(i2, j) and all(
                 f1.truth(i1, k) for k in range(
