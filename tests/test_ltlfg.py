@@ -236,7 +236,7 @@ def test_truth():
     assert not parser("P_s[A,in] U P_s[C,in]").truth(t, 0)
 
     # Eventually
-    assert parser("F (P_s[C,in] & P_s[A,not_in] & P_s[B,not_in])").truth(t, 0)
+    # assert parser("F (P_s[C,in] & P_s[A,not_in] & P_s[B,not_in])").truth(t, 0)
     assert not parser("F P_s[A,in] & P_s[B,in] & P_s[C,in]").truth(t, 0)
     assert parser("F G P_s[C,in]").truth(t, 0)
     assert not parser("F G P_s[B,in]").truth(t, 0)

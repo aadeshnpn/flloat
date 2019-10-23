@@ -114,9 +114,10 @@ class LTLfgAtomic(AtomicGFormula, LTLfgFormula):
 
     def truth(self, i: FiniteTrace, pos: int=0):
         # return self.a.truth(i.get(pos))
-        # print('atomic ltlfg',self.s, self.s.key)
-        # print('actual trace', i[self.s.key].get(pos))
-        return self.a.truth(i[self.s.key].get(pos))
+        try:
+            return self.a.truth(i[self.s.key].get(pos))
+        except KeyError:
+            return self.a.truth(i)
 
     def find_labels(self):
         return self.a.find_labels()
@@ -198,9 +199,8 @@ class LTLfNext(DualUnaryOperatorNNF, LTLfTemporalFormula):
     Not = LTLfNot
 
     def truth(self, i: FiniteTrace, pos: int=0):
-        if type(i).__name__ == 'dict':
-            i = FiniteTrace.fromStringSets(i[self.f.s.key])
-        return pos < i.last() and self.f.truth(i, pos + 1)
+        return pos < i[list(i.keys())[0]].last(
+            ) and self.f.truth(i, pos + 1)
 
     def _delta(self, i: PLGInterpretation, epsilon=False):
         if epsilon:
@@ -223,8 +223,8 @@ class LTLfWeakNext(
         return LTLfNot(LTLfNext(LTLfNot(self.f)))
 
     def truth(self, i: FiniteTrace, pos: int=0):
-        if type(i).__name__ == 'dict':
-            i = FiniteTrace.fromStringSets(i[self.f.s.key])
+        # if type(i).__name__ == 'dict':
+        #    i = FiniteTrace.fromStringSets(i[self.f.s.key])
         return self._convert().truth(i, pos)
 
     def _delta(self, i: PLGInterpretation, epsilon=False):
@@ -255,54 +255,12 @@ class LTLfUntil(DualBinaryOperatorNNF, LTLfTemporalFormula):
         f1 = self.formulas[0]
         f2 = LTLfUntil(
             self.formulas[1:]) if len(self.formulas) > 2 else self.formulas[1]
-        # print(f1, f2)
 
         n = i[list(i.keys())[0]].last()+1
-        # print('dict trace', i)
-
         return any(
              f2.truth(i, j) and all(
                  f1.truth(i, k) for k in range(
                      pos, j)) for j in range(pos, n))
-
-        # if type(i).__name__ == 'dict':
-
-        #     #, 'LTLfTrue', 'LTLfFalse'):
-        #     if type(f1).__name__ == LTLfgAtomic.__name__:
-        #         i1 = FiniteTrace.fromStringSets(i[f1.s.key])
-        #     elif type(f1).__name__ in ('LTLfTrue', 'LTLfFalse'):
-        #         i1 = FiniteTrace.fromStringSets(i[list(i.keys())[0]])
-        #     else:
-        #         i1 = FiniteTrace.fromStringSets(i[f1.f.s.key])
-        #     print(type(f2))
-        #     if type(f2).__name__ == LTLfUntil.__name__:
-        #         i2 = i
-        #     else:
-        #         if type(f2).__name__ == LTLfgAtomic.__name__:
-        #             i2 = FiniteTrace.fromStringSets(i[f2.s.key])
-        #         elif type(f2).__name__ in ('LTLfTrue', 'LTLfFalse'):
-        #             i2 = FiniteTrace.fromStringSets(i[list(i.keys())[0]])
-        #         elif type(f2).__name__ in ('LTLfAnd'):
-        #             print(dir(f2))
-        #             i2 = i # print('ltlfand',dir(f2))
-        #         else:
-        #             try:
-        #                 i2 = FiniteTrace.fromStringSets(i[f2.f.s.key])
-        #             except AttributeError:
-        #                 i2 = i1
-        # else:
-        #     i1, i2 = i, i
-
-        # b = all(
-        #    f1.truth(i1, k) for j in range(
-        #        pos, i1.last()+1) for k in range(pos, j))
-
-        # a = any(f2.truth(i2, j) for j in range(pos, i1.last()+1))
-
-        # return any(
-        #     f2.truth(i2, j) and all(
-        #         f1.truth(i1, k) for k in range(
-        #             pos, j)) for j in range(pos, i1.last()+1))
 
 
     def _delta(self, i: PLGInterpretation, epsilon=False):
