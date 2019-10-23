@@ -25,12 +25,15 @@ def test_ltlfg_mdp():
     a = LTLfgAtomic(FunctionSymbol('P_s[S11,in]'))
     b = LTLfgAtomic(FunctionSymbol('P_s[S88,in]'))
     # S and E are action. S11.. are states. The MDP world is 8x8
-    # t1 = FiniteTrace.fromStringSets(
-    t1 = FiniteTraceDict.fromDictSets(
-        {'s': [{'S11', 'S', 'S21', 'E', 'S22', 'E', 'S23', 'E', 'S24',
+
+    t1 = FiniteTrace.fromStringSets(
+        [{'S11', 'S', 'S21', 'E', 'S22', 'E', 'S23', 'E', 'S24',
         'E', 'S25', 'E', 'S26', 'E', 'S27', 'S', 'S37',
         'S', 'S47', 'S', 'S57', 'S', 'S67', 'E', 'S68',
-        'S', 'S78', 'S', 'S88'}] }
+        'S', 'S78', 'S', 'S88'}]
+    )
+    t1  = FiniteTraceDict.fromDictSets(
+        {'s': t1}
     )
     assert parsed_formula == LTLfRelease([a, b])
     assert parsed_formula.truth(t1) is True
@@ -43,8 +46,8 @@ def test_ltlfg_mdp_trace():
     a = LTLfgAtomic(FunctionSymbol('P_s[S11,in]'))
     b = LTLfgAtomic(FunctionSymbol('P_s[S88,in]'))
     # S and E are action. S11.. are states. The MDP world is 8x8
-    t1 = FiniteTraceDict.fromDictSets({
-        's': [
+    t1 = FiniteTrace.fromStringSets(
+        [
         {'S11'},
         {'S11', 'S'},
         {'S11', 'S', 'E'},
@@ -123,7 +126,11 @@ def test_ltlfg_mdp_trace():
          'S22', 'E', 'S23', 'E', 'S24', 'E', 'S25', 'E', 'S26', 'E', 'S27',
          'S', 'S37', 'S', 'S47', 'S', 'S57', 'S', 'S67', 'E', 'S68', 'S',
          'S78', 'S', 'S88'}
-    ]})
+    ])
+
+    t1  = FiniteTraceDict.fromDictSets(
+        {'s': t1}
+    )
     assert parsed_formula == LTLfRelease([a, b])
     assert parsed_formula.truth(t1) is False
 
@@ -132,10 +139,15 @@ def test_ltlfg_velocity():
     parser = LTLfGParser()
     formula = "P_v[19,<] R P_v[55,>]"
     parsed_formula = parser(formula)
-    t1 = FiniteTraceDict.fromDictSets({'v':[
+
+    t1 = FiniteTrace.fromStringSets([
         {'20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30',
          '31', '32', '33', '34', '35', '36', '37', '50', '51', '52', '53'}
-    ]})
+    ])
+
+    t1  = FiniteTraceDict.fromDictSets(
+        {'v': t1}
+    )
     assert parsed_formula.truth(t1) is True
 
 
@@ -143,9 +155,14 @@ def test_ltlfg_set():
     parser = LTLfGParser()
     formula = "P_s[A,not_in] R P_s[B,not_in]"
     parsed_formula = parser(formula)
-    t1 = FiniteTraceDict.fromDictSets({'s':[
+
+    t1 = FiniteTrace.fromStringSets([
         {'B', 'C', 'A'}
-    ]})
+    ])
+
+    t1  = FiniteTraceDict.fromDictSets(
+        {'s': t1}
+    )
     assert parsed_formula.truth(t1) is False
 
 
@@ -176,14 +193,16 @@ def test_parser():
 
 def test_truth():
     parser = LTLfGParser()
-    t = FiniteTraceDict.fromDictSets({'s':[
+    t = FiniteTrace.fromStringSets([
         {"A"},
         {"A"},
         {"B"},
         {"B"},
         {"C"},
         {"C"}
-    ]})
+    ])
+
+    t = FiniteTraceDict.fromDictSets({'s': t})
 
     # Next and Weak Next
     f = "X P_s[A,in]"
