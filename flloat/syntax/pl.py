@@ -148,8 +148,8 @@ class PLGAtomic(AtomicGFormula, PLFormula):
                 for val in i:
                     # print(self.s.state, self.s.operator, val)
                     result = eval(
-                        self.s.state + ' ' + self.s.operator +
-                        ' ' + val
+                        '\'' + self.s.state + '\'' + ' ' + self.s.operator +
+                        ' ' + '\'' + str(val) + '\''
                         )
                     if result is True:
                         return True
