@@ -25,17 +25,39 @@ class FunctionSymbol(Symbol):
             pass
 
     def _parse(self):
-        temp = re.match('[A-Za-z0-9_]*', self.name)
-        fname = temp.group()
-        fnames = fname.split('_')
-        self.fname = fnames[0]
-        self.key = '_'.join(fnames[1:])
-        args = re.search('\[[a-zA-Z0-9,_<>=!]*\]', self.name)
-        args = args.group()
-        arg1, arg2 = args.split(',')
-        self.state = arg1[1:]
-        self.operator = arg2[:-1]
+        # Normal syntax
+        # P_[a,b,c,d][3, none, <=]
+        # New notation with three agruments and multiple indexing
+        temp = re.match('^P_\[[A-Za-z0-9,\]]+', self.name)
+        if temp is None:
+            temp = re.match('[A-Za-z0-9_]*', self.name)
+            fname = temp.group()
+            fnames = fname.split('_')
+            # print(fname)
+            self.fname = fnames[0]
+            self.key = '_'.join(fnames[1:])
+            args = re.search('\[[a-zA-Z0-9,_<>=!]*\]', self.name)
+            args = args.group()
+            arg1, arg2 = args.split(',')
+            self.state = arg1[1:]
+            self.operator = arg2[:-1]
+            self.norm = None
+        else:
+            fname = temp.group()
+            fnames = fname.split('_')
+            # Get the function name
+            self.fname = fnames[0]
+            # Get the keys
+            temp = re.search('[A-Za-z0-9,]+', fnames[1])
+            temp = temp.group()
+            self.keys = temp.split(',')
+            self.key = self.keys[0]
+            args = re.search('[[A-Za-z0-9,.|!=<>]+]$', self.name)
+            args = args.group()
+            args = re.search('[A-Za-z0-9,.|!=<>]+', args)
+            args = args.group()
+            # print(args)
+            self.state, self.norm, self.operator = args.split(',')
 
     def __repr__(self):
         return self.name
-
