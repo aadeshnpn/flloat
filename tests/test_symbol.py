@@ -18,14 +18,36 @@ from flloat.syntax.ltlfg import (
 from flloat.syntax.pl import PLGAtomic, PLTrue, PLFalse, PLAnd, PLOr
 
 
-def test_ltlfg_mdp():
+def test_ltlfg_symbol():
     parser = LTLfGParser()
     # formula = "P_[a,b,c,d][3,none,<=]"
     formula = "P_[a,b,c,d][3,||.||,<=]"
     parsed_form = parser(formula)
     sym = FunctionSymbol(formula)
     sym._parse()
-    print(parsed_form)
-    # assert parsed_formula == LTLfRelease([a, b])
-    # assert parsed_formula.truth(t1) is True
-    assert 5 == 4
+    assert sym.keys == ['a','b','c','d']
+    assert sym.state == '3'
+    assert sym.operator == '<='
+
+
+def test_ltlfg_norm():
+    parser = LTLfGParser()
+    formula = "P_[x,y][0,|.|2,<=]"
+    x = FiniteTrace.fromStringSets([
+        {'0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '2',
+         '2', '2', '2', '2', '3', '3', '3', '3', '3', '4', '4'}
+    ])
+
+    y = FiniteTrace.fromStringSets([
+        {'0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '2',
+         '2', '2', '2', '2', '3', '3', '3', '3', '3', '4', '4'}
+    ])
+
+    t1  = FiniteTraceDict.fromDictSets(
+        {'x': x, 'y': y}
+    )
+
+    parsed_formula = parser(formula)
+    sym = FunctionSymbol(formula)
+    sym._parse()
+    assert parsed_formula.truth(t1) is True

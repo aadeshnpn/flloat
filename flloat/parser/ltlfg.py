@@ -55,7 +55,7 @@ class LTLfGLexer(Lexer):
 
     def t_ATOM(self, t):
         #r'[a-zA-Z_][a-zA-Z_0-9]*'
-        r'[A-Za-z_][\[\]a-zA-Z_0-9,.=<>!|]*'
+        r'[A-Za-z_][\[\]a-zA-Z_0-9,.=\-<>!|]*'
         t.type = LTLfGLexer.reserved.get(t.value, 'ATOM')  # Check for reserved words
         return t
 

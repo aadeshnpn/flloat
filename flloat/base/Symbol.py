@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flloat.base.hashable import Hashable
 import re
+import numpy as np
 
 
 class Symbol(str, Hashable):
@@ -33,15 +34,14 @@ class FunctionSymbol(Symbol):
             temp = re.match('[A-Za-z0-9_]*', self.name)
             fname = temp.group()
             fnames = fname.split('_')
-            # print(fname)
             self.fname = fnames[0]
-            self.key = '_'.join(fnames[1:])
-            args = re.search('\[[a-zA-Z0-9,_<>=!]*\]', self.name)
+            self.keys = '_'.join(fnames[1:])
+            args = re.search('\[[a-zA-Z0-9,\-_<>=!]*\]', self.name)
             args = args.group()
             arg1, arg2 = args.split(',')
             self.state = arg1[1:]
             self.operator = arg2[:-1]
-            self.norm = None
+            self.norm = 'none'
         else:
             fname = temp.group()
             fnames = fname.split('_')
@@ -51,13 +51,20 @@ class FunctionSymbol(Symbol):
             temp = re.search('[A-Za-z0-9,]+', fnames[1])
             temp = temp.group()
             self.keys = temp.split(',')
-            self.key = self.keys[0]
-            args = re.search('[[A-Za-z0-9,.|!=<>]+]$', self.name)
+            # self.key = self.keys[0]
+            args = re.search('[[A-Za-z0-9,.\-|!=<>]+]$', self.name)
             args = args.group()
-            args = re.search('[A-Za-z0-9,.|!=<>]+', args)
+            args = re.search('[A-Za-z0-9,.\-|!=<>]+', args)
             args = args.group()
-            # print(args)
             self.state, self.norm, self.operator = args.split(',')
+            if self.norm == '|.|2':
+                self.norm = 2
+            elif self.norm == '|.|1':
+                self.norm = 1
+            elif self.norm == '|.|inf':
+                self.norm = np.inf
+            else:
+                self.norm = 2
 
     def __repr__(self):
         return self.name

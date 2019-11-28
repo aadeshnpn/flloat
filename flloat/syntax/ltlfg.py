@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from functools import lru_cache
 from typing import Set
+import numpy as np
 
 from flloat.base.Formula import (
     Formula, CommutativeBinaryOperator, AtomicGFormula,
@@ -113,10 +114,16 @@ class LTLfgAtomic(AtomicGFormula, LTLfgFormula):
         return PLTrue() if self.a.truth(i) else PLFalse()
 
     def truth(self, i: FiniteTrace, pos: int=0):
-        # return self.a.truth(i.get(pos))
         try:
-            return self.a.truth(i[self.s.key].get(pos))
-        except KeyError:
+            if type(self.s.norm).__name__ != type('a').__name__:
+                # extract the values and compute norms
+                nlist = []
+                for k in self.s.keys:
+                    nlist.append(i[k].get(pos))
+                return self.a.truth(nlist)
+            else:
+                return self.a.truth(i[self.s.keys[0]].get(pos))
+        except (KeyError, AttributeError):
             return self.a.truth(i)
 
     def find_labels(self):

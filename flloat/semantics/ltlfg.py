@@ -25,19 +25,57 @@ class _PLGInterpretation(Interpretation):
             elif item.operator == Operators.NOT_IN.value:
                 return item.state not in self.true_propositions
             else:
-                for val in self.true_propositions:
-                    result = eval(
-                        item.state + ' ' + item.operator +
-                        ' ' + val
-                        )
-                    if result is True:
-                        return True
-                return False
+                if item.norm == 'none':
+                    for val in i:
+                        # print(self.s.state, self.s.operator, val)
+                        result = eval(
+                            '\'' + item.state + '\'' + ' ' + item.operator +
+                            ' ' + '\'' + str(val) + '\''
+                            )
+                        if result is True:
+                            return True
+                    return False
+                else:
+                    setval = []
+                    for v in self.true_propositions:
+                        setval.append(list(v))
+
+                    for k in range(len(setval[0])):
+                        nlist = []
+                        for llist in setval:
+                            temp = llist[k]
+                            nlist.append(np.float(temp))
+                        array = np.array(nlist)
+                        val = np.linalg.norm(array, ord=item.norm)
+                        result = eval(
+                            '\'' + item.state + '\'' + ' ' + item.operator +
+                            ' ' + '\'' + str(val) + '\''
+                            )
+                        if result is True:
+                            return True
+                    return False
+
+                # if item.norm == 'none':
+                #    for val in self.true_propositions:
+                #        result = eval(
+                #            item.state + ' ' + item.operator +
+                #            ' ' + val
+                #            )
+                #        if result is True:
+                #            return True
+                #    return False
+                # Need to compute norm
+                # else:
+                #    print('from interpretations', self.true_propositions)
+                #    pass
         except AttributeError:
             return item in self.true_propositions
 
     def __iter__(self):
         return self.true_propositions.__iter__()
+
+    def __len__(self):
+        return len(self.true_propositions)
 
     def __str__(self):
         return "{" + ", ".join(map(str, self._members())) + "}"

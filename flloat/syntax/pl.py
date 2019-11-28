@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from functools import lru_cache
 from typing import Set
-
+import numpy as np
 
 from flloat.base.Alphabet import _Alphabet, Alphabet
 from flloat.base.Formula import (
@@ -138,25 +138,43 @@ class PLGAtomic(AtomicGFormula, PLFormula):
     #     AtomicFormula.__init__(self, s)
 
     def truth(self, i: PLGInterpretation, *args):
-        # return self.s in i
         try:
             if self.s.operator == Operators.IN.value:
                 return self.s.state in i
             elif self.s.operator == Operators.NOT_IN.value:
                 return self.s.state not in i
             else:
-                for val in i:
-                    # print(self.s.state, self.s.operator, val)
-                    result = eval(
-                        '\'' + self.s.state + '\'' + ' ' + self.s.operator +
-                        ' ' + '\'' + str(val) + '\''
-                        )
-                    if result is True:
-                        return True
-                return False
+                if self.s.norm == 'none':
+                    for val in i:
+                        # print(self.s.state, self.s.operator, val)
+                        result = eval(
+                            '\'' + self.s.state + '\'' + ' ' + self.s.operator +
+                            ' ' + '\'' + str(val) + '\''
+                            )
+                        if result is True:
+                            return True
+                    return False
+                else:
+                    setval = []
+                    for v in i:
+                        setval.append(list(v))
+
+                    for k in range(len(setval[0])):
+                        nlist = []
+                        for llist in setval:
+                            temp = llist[k]
+                            nlist.append(np.float(temp))
+                        array = np.array(nlist)
+                        val = np.linalg.norm(array, ord=self.s.norm)
+                        result = eval(
+                            '\'' + self.s.state + '\'' + ' ' + self.s.operator +
+                            ' ' + '\'' + str(val) + '\''
+                            )
+                        if result is True:
+                            return True
+                    return False
 
         except AttributeError:
-            # print(i, self.s)
             return self.s in i
 
     def _to_nnf(self):
