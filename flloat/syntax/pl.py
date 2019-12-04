@@ -146,7 +146,6 @@ class PLGAtomic(AtomicGFormula, PLFormula):
             else:
                 if self.s.norm == 'none':
                     for val in i:
-                        # print(self.s.state, self.s.operator, val)
                         result = eval(
                             '\'' + self.s.state + '\'' + ' ' + self.s.operator +
                             ' ' + '\'' + str(val) + '\''

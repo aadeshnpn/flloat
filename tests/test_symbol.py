@@ -51,3 +51,25 @@ def test_ltlfg_norm():
     sym = FunctionSymbol(formula)
     sym._parse()
     assert parsed_formula.truth(t1) is True
+
+
+def test_ltltf_real():
+    t = [set(['31', '31', '21', '11', '10', '10', '11', '11', '11', '12', '13', '14', '14', '14', '24', '24', '24', '14', '04', '03', '02', '02', '02', '02', '02', '02', '02', '03', '03', '03', '02', '12', '13', '14', '14', '14', '04', '04', '04', '04', '03', '02', '12', '02', '03', '03', '03', '04', '04', '03', '02', '12', '12', '11', '10', '11', '01', '01', '01', '01', '00'])]
+    goalspec = 'P_[T][00,none,==]'
+    parser = LTLfGParser()
+
+    # Define goal formula/specification
+    parsed_formula = parser(goalspec)
+    print(parsed_formula)
+    tl = FiniteTrace.fromStringSets(t)
+    t  = FiniteTraceDict.fromDictSets(
+        {'T': tl}
+    )
+    #result = parsed_formula.truth(t)
+
+    sym = FunctionSymbol(goalspec)
+    sym._parse()
+    assert sym.keys == ['T']
+    assert sym.state == '00'
+    assert sym.operator == '=='
+    assert parsed_formula.truth(t) is True

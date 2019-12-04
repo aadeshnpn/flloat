@@ -63,6 +63,8 @@ class FunctionSymbol(Symbol):
                 self.norm = 1
             elif self.norm == '|.|inf':
                 self.norm = np.inf
+            elif self.norm == 'none':
+                self.norm = 'none'
             else:
                 self.norm = 2
 

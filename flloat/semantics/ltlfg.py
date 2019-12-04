@@ -27,7 +27,6 @@ class _PLGInterpretation(Interpretation):
             else:
                 if item.norm == 'none':
                     for val in i:
-                        # print(self.s.state, self.s.operator, val)
                         result = eval(
                             '\'' + item.state + '\'' + ' ' + item.operator +
                             ' ' + '\'' + str(val) + '\''
