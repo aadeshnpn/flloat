@@ -19,6 +19,7 @@ class FunctionSymbol(Symbol):
         """Functional Symbol."""
         super().__init__(name)
         self.name = name
+        self.origin = None
         try:
             self._parse()
         except AttributeError:
@@ -56,13 +57,18 @@ class FunctionSymbol(Symbol):
             args = args.group()
             args = re.search('[A-Za-z0-9,.\-|!=<>]+', args)
             args = args.group()
-            self.state, self.norm, self.operator = args.split(',')
+            try:
+                self.state, self.norm, self.operator,self.origin = args.split(',')
+            except ValueError:
+                self.state, self.norm, self.operator = args.split(',')
             if self.norm == '|.|2':
                 self.norm = 2
             elif self.norm == '|.|1':
                 self.norm = 1
             elif self.norm == '|.|inf':
                 self.norm = np.inf
+            elif self.norm == '|.|city':
+                self.norm = 'cityblock'
             elif self.norm == 'none':
                 self.norm = 'none'
             else:

@@ -21,7 +21,7 @@ from flloat.syntax.pl import PLGAtomic, PLTrue, PLFalse, PLAnd, PLOr
 def test_ltlfg_symbol():
     parser = LTLfGParser()
     # formula = "P_[a,b,c,d][3,none,<=]"
-    formula = "P_[a,b,c,d][3,||.||,<=]"
+    formula = "P_[a,b,c,d][3,||.||,<=,00]"
     parsed_form = parser(formula)
     sym = FunctionSymbol(formula)
     sym._parse()
@@ -32,7 +32,7 @@ def test_ltlfg_symbol():
 
 def test_ltlfg_norm():
     parser = LTLfGParser()
-    formula = "P_[x,y][0,|.|2,<=]"
+    formula = "P_[x,y][0,|.|2,<=,00]"
     x = FiniteTrace.fromStringSets([
         {'0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '2',
          '2', '2', '2', '2', '3', '3', '3', '3', '3', '4', '4'}
@@ -73,3 +73,42 @@ def test_ltltf_real():
     assert sym.state == '00'
     assert sym.operator == '=='
     assert parsed_formula.truth(t) is True
+
+
+def test_ltlfg_norm_cityblock():
+    parser = LTLfGParser()
+    formula = "P_[l][10,|.|city,==,00]"
+    l = FiniteTrace.fromStringSets([
+        {'01', '02', '03', '11', '12', '13', '21', '22',
+         '23', '31', '32', '33'}
+    ])
+
+    t1  = FiniteTraceDict.fromDictSets(
+        {'l': l}
+    )
+
+    parsed_formula = parser(formula)
+    sym = FunctionSymbol(formula)
+    sym._parse()
+    assert parsed_formula.truth(t1) is False
+
+
+def test_ltlfg_norm_origin():
+    parser = LTLfGParser()
+    formula = "P_[x,y][9,|.|2,<=,00]"
+    x = FiniteTrace.fromStringSets([
+        {'0', '1', '2'}
+    ])
+
+    y = FiniteTrace.fromStringSets([
+        {'0', '1', '2'}
+    ])
+
+    t1  = FiniteTraceDict.fromDictSets(
+        {'x': x, 'y': y}
+    )
+
+    parsed_formula = parser(formula)
+    sym = FunctionSymbol(formula)
+    sym._parse()
+    assert parsed_formula.truth(t1) is False

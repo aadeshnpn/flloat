@@ -1,5 +1,7 @@
 from abc import abstractmethod
 from typing import FrozenSet, Set, List
+from scipy.spatial.distance import cdist
+import numpy as np
 
 from flloat.base.Interpretation import Interpretation
 from flloat.base.Symbol import Symbol, FunctionSymbol
@@ -34,6 +36,18 @@ class _PLGInterpretation(Interpretation):
                         if result is True:
                             return True
                     return False
+                elif self.s.norm == 'cityblock':
+                    for val in i:
+                        # self.s.origin = [[0,0]]
+                        origin = item.origin
+                        dist = cdist([[origin[0], origin[1]]], [[val[0], val[1]]], metric=item.norm)[0][0]
+                        result = eval(
+                            '\'' + item.state + '\'' + ' ' + item.operator +
+                            ' ' + '\'' + str(int(dist)) + '\''
+                            )
+                        if result is True:
+                            return True
+                    return False
                 else:
                     setval = []
                     for v in self.true_propositions:
@@ -45,10 +59,13 @@ class _PLGInterpretation(Interpretation):
                             temp = llist[k]
                             nlist.append(np.float(temp))
                         array = np.array(nlist)
-                        val = np.linalg.norm(array, ord=item.norm)
+                        origin = [float(i) for i in item.origin]
+                        origin = np.array(origin)
+                        array = array - origin
+                        dist = np.linalg.norm(array, ord=item.norm)
                         result = eval(
                             '\'' + item.state + '\'' + ' ' + item.operator +
-                            ' ' + '\'' + str(val) + '\''
+                            ' ' + '\'' + str(dist) + '\''
                             )
                         if result is True:
                             return True

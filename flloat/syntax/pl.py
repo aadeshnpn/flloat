@@ -2,6 +2,8 @@ from abc import abstractmethod
 from functools import lru_cache
 from typing import Set
 import numpy as np
+from scipy.spatial.distance import cdist
+
 
 from flloat.base.Alphabet import _Alphabet, Alphabet
 from flloat.base.Formula import (
@@ -153,6 +155,17 @@ class PLGAtomic(AtomicGFormula, PLFormula):
                         if result is True:
                             return True
                     return False
+                elif self.s.norm == 'cityblock':
+                    for val in i:
+                        origin = self.s.origin
+                        dist = cdist([[origin[0], origin[1]]], [[val[0], val[1]]], metric=self.s.norm)[0][0]
+                        result = eval(
+                            '\'' + self.s.state + '\'' + ' ' + self.s.operator +
+                            ' ' + '\'' + str(int(dist)) + '\''
+                            )
+                        if result is True:
+                            return True
+                    return False
                 else:
                     setval = []
                     for v in i:
@@ -164,10 +177,13 @@ class PLGAtomic(AtomicGFormula, PLFormula):
                             temp = llist[k]
                             nlist.append(np.float(temp))
                         array = np.array(nlist)
-                        val = np.linalg.norm(array, ord=self.s.norm)
+                        origin = [float(i) for i in self.s.origin]
+                        origin = np.array(origin)
+                        array = array - origin
+                        dist = np.linalg.norm(array, ord=self.s.norm)
                         result = eval(
                             '\'' + self.s.state + '\'' + ' ' + self.s.operator +
-                            ' ' + '\'' + str(val) + '\''
+                            ' ' + '\'' + str(dist) + '\''
                             )
                         if result is True:
                             return True
