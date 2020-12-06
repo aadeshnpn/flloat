@@ -112,3 +112,21 @@ def test_ltlfg_norm_origin():
     sym = FunctionSymbol(formula)
     sym._parse()
     assert parsed_formula.truth(t1) is False
+
+
+def test_ltltf_two_index():
+    t = [set(['31', '31', '21', '11', '10', '10', '11', '11', '11', '12', '13', '14', '14', '14', '24', '24', '24', '14', '04', '03', '02', '02', '02', '02', '02', '02', '02', '03', '03', '03', '02', '12', '13', '14', '14', '14', '04', '04', '04', '04', '03', '02', '12', '02', '03', '03', '03', '04', '04', '03', '02', '12', '12', '11', '10', '11', '01', '01', '01', '01', '00'])]
+    t2 = [set(list(range(50, 63)))]
+    goalspec = '((F(P_[T][00,none,==])) & F(P_[R][60,none,==]))'
+    # goalspec = 'F P_[T][00,none,==]'
+    parser = LTLfGParser()
+
+    # Define goal formula/specification
+    parsed_formula = parser(goalspec)
+    print(parsed_formula)
+    tl = FiniteTrace.fromStringSets(t)
+    tr = FiniteTrace.fromStringSets(t2)
+    t  = FiniteTraceDict.fromDictSets(
+        {'T': tl, 'R': tr}
+    )
+    assert parsed_formula.truth(t) is True
